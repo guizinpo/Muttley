@@ -1,0 +1,13 @@
+package br.com.fatec.muttley.Muttley;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class MuttleyApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(MuttleyApplication.class, args);
+	}
+
+}
