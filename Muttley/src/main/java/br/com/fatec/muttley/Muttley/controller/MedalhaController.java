@@ -42,4 +42,30 @@ public class MedalhaController {
             @RequestParam int semestre) {
         return ResponseEntity.ok(medalhaService.calcularMedalhasSemestre(ano, semestre));
     }
+
+    @GetMapping("/exportar")
+    public ResponseEntity<byte[]> exportarCsv(
+            @RequestParam int ano,
+            @RequestParam int semestre) {
+
+        List<MedalhaResultadoDTO> resultado = medalhaService.calcularMedalhasSemestre(ano, semestre);
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("Participante,CPF,Pontos,Medalha\n");
+
+        for (MedalhaResultadoDTO item : resultado) {
+            csv.append(item.getParticipante()).append(",")
+                    .append(item.getCpf()).append(",")
+                    .append(item.getPontos()).append(",")
+                    .append(item.getMedalha() != null ? item.getMedalha() : "Sem medalha")
+                    .append("\n");
+        }
+
+        byte[] bytes = csv.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/csv; charset=UTF-8")
+                .header("Content-Disposition", "attachment; filename=medalhas_" + semestre + "_" + ano + ".csv")
+                .body(bytes);
+    }
 }
