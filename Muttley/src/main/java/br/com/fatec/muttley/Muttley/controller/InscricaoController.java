@@ -24,8 +24,9 @@ public class InscricaoController {
     @GetMapping("/evento/{eventoId}")
     public ResponseEntity<Page<Inscricao>> listarPorEvento(
             @PathVariable Long eventoId,
+            @RequestParam(required = false) String busca,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(service.listarPorEvento(eventoId, pageable));
+        return ResponseEntity.ok(service.listarPorEvento(eventoId, busca, pageable));
     }
 
     @GetMapping("/participante/{participanteId}/pontos")

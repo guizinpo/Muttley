@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mutley — Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="app-page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🎓</span>
+      <span>Mutley</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a href="dashboard.html" class="nav-item active">🏠 Dashboard</a>
+      <div class="nav-section-label">Participantes</div>
+      <a href="participantes.html" class="nav-item">🔍 Consultar</a>
+      <div class="nav-section-label">Eventos</div>
+      <a href="eventos.html" class="nav-item">🔍 Consultar</a>
+      <a href="evento-form.html" class="nav-item">➕ Cadastrar</a>
+      <div class="nav-section-label">Medalhas</div>
+      <a href="medalhas.html" class="nav-item">🏅 Medalhas</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="login.html" class="nav-item logout">⬅ Sair</a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <h2>Dashboard</h2>
+      <div class="topbar-user">👤 Administrador</div>
+    </header>
+
+    <div class="page-body">
+      <!-- Próximos eventos -->
+      <section class="section-box">
+        <h3 class="section-title">Próximos Eventos</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Evento</th>
+              <th>Área</th>
+              <th>Palestrante</th>
+              <th>Início</th>
+              <th>Pontos</th>
+              <th>Inscritos</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-eventos">
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+  
+  <script>
+    fetch('http://localhost:8080/api/dashboard')
+      .then(res => res.json())
+      .then(eventos => {
+        const tabela = document.getElementById('tabela-eventos');
+        eventos.forEach(evento => {
+          const areaClass = evento.area === 'Tecnologia' ? 'badge-blue' : 'badge-green';
+          const dataFormatada = new Date(evento.dataEvento).toLocaleDateString('pt-BR');
+          const horario = evento.horaInicio.substring(0, 5);
+          tabela.innerHTML += `
+            <tr>
+              <td>${evento.descricao}</td>
+              <td><span class="badge ${areaClass}">${evento.area}</span></td>
+              <td>${evento.palestrante}</td>
+              <td>${dataFormatada} ${horario}</td>
+              <td>${evento.pontos.toFixed(1).replace('.', ',')}</td>
+              <td>${evento.inscritos}</td>
+            </tr>
+          `;
+        });
+      })
+      .catch(err => console.error('Erro ao carregar eventos:', err));
+  </script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mutley — Detalhes do Participante</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="app-page">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">🎓</span><span>Mutley</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+      <div class="nav-section-label">Participantes</div>
+      <a href="participantes.html" class="nav-item active">🔍 Consultar</a>
+      <div class="nav-section-label">Eventos</div>
+      <a href="eventos.html" class="nav-item">🔍 Consultar</a>
+      <a href="evento-form.html" class="nav-item">➕ Cadastrar</a>
+      <div class="nav-section-label">Medalhas</div>
+      <a href="medalhas.html" class="nav-item">🏅 Medalhas</a>
+    </nav>
+    <div class="sidebar-footer"><a href="login.html" class="nav-item logout">⬅ Sair</a></div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <h2>Detalhes do Participante</h2>
+      <div class="topbar-user">👤 Administrador</div>
+    </header>
+
+    <div class="page-body">
+      <nav class="breadcrumb">
+        <a href="participantes.html">Participantes</a> › <span id="breadcrumb-nome"></span>
+      </nav>
+
+      <div class="detail-grid detail-grid-participant">
+        <div class="section-box detail-info">
+          <h3 class="section-title">Dados Cadastrais</h3>
+          <dl class="detail-list">
+            <dt>Nome</dt><dd id="d-nome"></dd>
+            <dt>CPF</dt><dd id="d-cpf"></dd>
+            <dt>E-mail</dt><dd id="d-email"></dd>
+            <dt>Tipo</dt><dd><span class="badge" id="d-tipo"></span></dd>
+          </dl>
+          <div class="detail-actions">
+            <a id="btn-editar" href="#" class="btn btn-ghost">✏️ Editar Participante</a>
+          </div>
+        </div>
+
+        <div class="section-box points-card">
+          <h3 class="section-title">Pontuação do Semestre</h3>
+          <div class="points-display">
+            <div class="points-value" id="pontos-total">0,0</div>
+            <div class="points-label">pontos acumulados</div>
+            <div class="medal-badge" id="medal-badge"></div>
+            <div class="points-breakdown" id="points-breakdown"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-box">
+        <h3 class="section-title">Eventos em que se inscreveu</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Evento</th>
+              <th>Tipo</th>
+              <th>Área</th>
+              <th>Data</th>
+              <th>Horário</th>
+              <th>Pontos</th>
+              <th>Status</th>
+              <th>Certificado</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-eventos-participante"></tbody>
+        </table>
+        <div class="pagination">
+          <button class="btn btn-ghost" id="btn-anterior" onclick="mudarPagina(-1)">‹ Anterior</button>
+          <span class="page-info" id="page-info-eventos">Página 1 de 1</span>
+          <button class="btn btn-ghost" id="btn-proxima" onclick="mudarPagina(1)">Próxima ›</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const BASE_URL = 'http://localhost:8080';
+    const params = new URLSearchParams(window.location.search);
+    const participanteId = params.get('id');
+    let paginaAtual = 0;
+    let totalPaginas = 1;
+
+    const tipoBadge = { 'PALESTRA': 'badge-blue', 'WORKSHOP': 'badge-orange', 'SEMINARIO': 'badge-purple', 'MINICURSO': 'badge-green', 'FATEC_PORTAS_ABERTAS': 'badge-gray' };
+    const areaBadge = { 'Tecnologia': 'badge-blue', 'Direito': 'badge-purple', 'Saúde': 'badge-green' };
+
+    function carregarParticipante() {
+      const ano = new Date().getFullYear();
+      const semestre = new Date().getMonth() < 6 ? 1 : 2;
+
+      fetch(`${BASE_URL}/api/participantes/${participanteId}?ano=${ano}&semestre=${semestre}`)
+        .then(res => res.json())
+        .then(p => {
+          document.getElementById('breadcrumb-nome').textContent = p.nome;
+          document.getElementById('d-nome').textContent = p.nome;
+          document.getElementById('d-cpf').textContent = p.cpf;
+          document.getElementById('d-email').textContent = p.email;
+          document.getElementById('btn-editar').href = `participante-form.html?id=${p.id}`;
+
+          const tipoEl = document.getElementById('d-tipo');
+          tipoEl.textContent = p.tipo === 'PALESTRANTE' ? 'Palestrante' : 'Ouvinte';
+          tipoEl.className = `badge ${p.tipo === 'PALESTRANTE' ? 'badge-blue' : 'badge-green'}`;
+
+          document.getElementById('pontos-total').textContent = p.pontuacaoSemestre.toFixed(1).replace('.', ',');
+          atualizarMedalha(p.medalha, p.pontuacaoSemestre);
+        });
+    }
+
+    function atualizarMedalha(medalha, pontos) {
+      const medalBadge = document.getElementById('medal-badge');
+      const breakdown = document.getElementById('points-breakdown');
+
+      const icones = { 'OURO': '🥇', 'PRATA': '🥈', 'BRONZE': '🥉' };
+      const nomes = { 'OURO': 'Ouro', 'PRATA': 'Prata', 'BRONZE': 'Bronze' };
+
+      if (medalha) {
+        medalBadge.innerHTML = `<span class="medal-icon">${icones[medalha]}</span><span class="medal-name">Medalha ${nomes[medalha]}</span>`;
+        medalBadge.className = 'medal-badge medal-earned';
+      } else {
+        medalBadge.innerHTML = `<span class="medal-icon">—</span><span class="medal-name">Sem medalha ainda</span>`;
+        medalBadge.className = 'medal-badge';
+      }
+
+      fetch(`${BASE_URL}/api/medalhas/regras`)
+        .then(res => res.json())
+        .then(regras => {
+          breakdown.innerHTML = `
+            <span class="breakdown-item ${medalha === 'BRONZE' ? 'active-range' : ''}">Bronze: ${regras.bronzeMin}–${regras.bronzeMax} pts${medalha === 'BRONZE' ? ' ✓' : ''}</span>
+            <span class="breakdown-item ${medalha === 'PRATA' ? 'active-range' : ''}">Prata: ${regras.prataMin}–${regras.prataMax} pts${medalha === 'PRATA' ? ' ✓' : ''}</span>
+            <span class="breakdown-item ${medalha === 'OURO' ? 'active-range' : ''}">Ouro: ${regras.ouroMin}–${regras.ouroMax} pts${medalha === 'OURO' ? ' ✓' : ''}</span>
+          `;
+        });
+    }
+
+    function carregarInscricoes() {
+      fetch(`${BASE_URL}/api/inscricoes/participante/${participanteId}?page=${paginaAtual}&size=10`)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById('tbody-eventos-participante');
+          tbody.innerHTML = '';
+          totalPaginas = data.totalPages;
+
+          if (data.content.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999;">Nenhuma inscrição encontrada.</td></tr>';
+            return;
+          }
+
+          data.content.forEach(inscricao => {
+            const ev = inscricao.evento;
+            const status = inscricao.status === 'CONCLUIDO' ? 'Concluído' : 'Agendado';
+            const statusClass = inscricao.status === 'CONCLUIDO' ? 'badge-green' : 'badge-orange';
+            const data = new Date(ev.dataEvento).toLocaleDateString('pt-BR');
+            const horario = `${ev.horaInicio.substring(0,5)}–${ev.horaFim.substring(0,5)}`;
+            const certBtn = inscricao.status === 'CONCLUIDO'
+              ? `<button class="btn btn-sm btn-primary" onclick="baixarCertificado(${inscricao.id})">⬇️ PDF</button>`
+              : `<span style="color:var(--gray-400);font-size:0.8rem;">—</span>`;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><a href="evento-detalhes.html?id=${ev.id}" class="cpf-link">${ev.descricao}</a></td>
+              <td><span class="badge ${tipoBadge[ev.tipo] || ''}">${ev.tipo}</span></td>
+              <td><span class="badge ${areaBadge[ev.area] || ''}">${ev.area}</span></td>
+              <td>${data}</td>
+              <td>${horario}</td>
+              <td>${ev.pontos.toFixed(1)}</td>
+              <td><span class="badge ${statusClass}">${status}</span></td>
+              <td>${certBtn}</td>`;
+            tbody.appendChild(tr);
+          });
+
+          document.getElementById('page-info-eventos').textContent =
+            `Página ${paginaAtual + 1} de ${totalPaginas} — ${data.totalElements} eventos`;
+          document.getElementById('btn-anterior').disabled = paginaAtual === 0;
+          document.getElementById('btn-proxima').disabled = paginaAtual >= totalPaginas - 1;
+        });
+    }
+
+    function baixarCertificado(inscricaoId) {
+      fetch(`${BASE_URL}/api/inscricoes/${inscricaoId}/certificado`)
+        .then(res => res.blob())
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'certificado.pdf';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        });
+    }
+
+    function mudarPagina(direcao) {
+      paginaAtual += direcao;
+      carregarInscricoes();
+    }
+
+    carregarParticipante();
+    carregarInscricoes();
+  </script>
+</body>
+</html>

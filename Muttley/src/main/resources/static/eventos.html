@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mutley — Eventos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="app-page">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">🎓</span><span>Mutley</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+      <div class="nav-section-label">Participantes</div>
+      <a href="participantes.html" class="nav-item">🔍 Consultar</a>
+      <div class="nav-section-label">Eventos</div>
+      <a href="eventos.html" class="nav-item active">🔍 Consultar</a>
+      <a href="evento-form.html" class="nav-item">➕ Cadastrar</a>
+      <div class="nav-section-label">Medalhas</div>
+      <a href="medalhas.html" class="nav-item">🏅 Medalhas</a>
+    </nav>
+    <div class="sidebar-footer"><a href="login.html" class="nav-item logout">⬅ Sair</a></div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <h2>Eventos</h2>
+      <div class="topbar-user">👤 Administrador</div>
+    </header>
+
+    <div class="page-body">
+      <div class="section-box">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th>Área</th>
+              <th>Palestrante</th>
+              <th>Início</th>
+              <th>Pts</th>
+              <th>Inscritos</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-eventos"></tbody>
+        </table>
+        <div class="pagination">
+          <button class="btn btn-ghost" id="btn-anterior" onclick="mudarPagina(-1)">‹ Anterior</button>
+          <span class="page-info" id="info-pagina">Página 1 de 1</span>
+          <button class="btn btn-ghost" id="btn-proxima" onclick="mudarPagina(1)">Próxima ›</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="modal-excluir" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3>Excluir Evento</h3>
+      <p>Tem certeza que deseja excluir o evento <strong id="modal-nome"></strong>?</p>
+      <p class="warning-text">⚠️ Todas as inscrições vinculadas a este evento também serão removidas.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+        <button class="btn btn-danger" onclick="confirmarExclusao()">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BASE_URL = 'http://localhost:8080';
+    let paginaAtual = 0;
+    let totalPaginas = 1;
+    let selecionadoId = null;
+
+    const tipoBadge = {
+      'PALESTRA': 'badge-blue',
+      'WORKSHOP': 'badge-orange',
+      'SEMINARIO': 'badge-purple',
+      'MINICURSO': 'badge-green',
+      'FATEC_PORTAS_ABERTAS': 'badge-gray'
+    };
+    const areaBadge = {
+      'Tecnologia': 'badge-blue',
+      'Direito': 'badge-purple',
+      'Saúde': 'badge-green'
+    };
+
+    function carregarEventos() {
+      fetch(`${BASE_URL}/api/eventos?page=${paginaAtual}&size=10`)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById('tbody-eventos');
+          tbody.innerHTML = '';
+          totalPaginas = data.totalPages;
+
+          if (data.content.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999;">Nenhum evento encontrado.</td></tr>';
+            return;
+          }
+
+          data.content.forEach(ev => {
+            const dataFormatada = new Date(ev.dataEvento).toLocaleDateString('pt-BR');
+            const horario = ev.horaInicio.substring(0, 5);
+            const tipoLabel = ev.tipo.charAt(0) + ev.tipo.slice(1).toLowerCase().replace('_', ' ');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><span class="badge ${tipoBadge[ev.tipo] || ''}">${tipoLabel}</span></td>
+              <td>${ev.descricao}</td>
+              <td><span class="badge ${areaBadge[ev.area] || ''}">${ev.area}</span></td>
+              <td>${ev.palestrante}</td>
+              <td>${dataFormatada} ${horario}</td>
+              <td>${ev.pontos.toFixed(1)}</td>
+              <td><span class="badge badge-gray">${ev.inscritos}</span></td>
+              <td>
+                <a href="evento-detalhes.html?id=${ev.id}" class="btn btn-sm btn-ghost">👁 Ver</a>
+                <a href="evento-form.html?id=${ev.id}" class="btn btn-sm btn-ghost">✏️ Editar</a>
+                <button class="btn btn-sm btn-danger-ghost" onclick="abrirModal(${ev.id}, '${ev.descricao}')">🗑️</button>
+              </td>`;
+            tbody.appendChild(tr);
+          });
+
+          document.getElementById('info-pagina').textContent = `Página ${paginaAtual + 1} de ${totalPaginas}`;
+          document.getElementById('btn-anterior').disabled = paginaAtual === 0;
+          document.getElementById('btn-proxima').disabled = paginaAtual >= totalPaginas - 1;
+        });
+    }
+
+    function mudarPagina(direcao) {
+      paginaAtual += direcao;
+      carregarEventos();
+    }
+
+    function abrirModal(id, nome) {
+      selecionadoId = id;
+      document.getElementById('modal-nome').textContent = nome;
+      document.getElementById('modal-excluir').classList.remove('hidden');
+    }
+
+    function fecharModal() {
+      document.getElementById('modal-excluir').classList.add('hidden');
+    }
+
+    function confirmarExclusao() {
+      fetch(`${BASE_URL}/api/eventos/${selecionadoId}`, { method: 'DELETE' })
+        .then(res => {
+          if (res.ok) {
+            fecharModal();
+            carregarEventos();
+          }
+        });
+    }
+
+    carregarEventos();
+  </script>
+</body>
+</html>

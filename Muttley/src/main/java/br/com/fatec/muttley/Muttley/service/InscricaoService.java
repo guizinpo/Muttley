@@ -23,8 +23,11 @@ public class InscricaoService {
     private final EventoService eventoService;
     private final ParticipanteService participanteService;
 
-    public Page<Inscricao> listarPorEvento(Long eventoId, Pageable pageable) {
+    public Page<Inscricao> listarPorEvento(Long eventoId, String busca, Pageable pageable) {
         eventoService.buscarPorId(eventoId);
+        if (busca != null && !busca.isBlank()) {
+            return repository.findByEventoIdAndBusca(eventoId, busca, pageable);
+        }
         return repository.findByEventoId(eventoId, pageable);
     }
 

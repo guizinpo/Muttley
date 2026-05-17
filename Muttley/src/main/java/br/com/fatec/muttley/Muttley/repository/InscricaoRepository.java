@@ -38,4 +38,9 @@ public interface InscricaoRepository extends JpaRepository<Inscricao, Long> {
             "AND (MONTH(i.dataHoraInscricao) <= 6 AND :semestre = 1 " +
             "OR MONTH(i.dataHoraInscricao) > 6 AND :semestre = 2)")
     List<Inscricao> findByStatusAndSemestre(StatusInscricao status, int ano, int semestre);
+
+    @Query("SELECT i FROM Inscricao i WHERE i.evento.id = :eventoId " +
+            "AND (LOWER(i.participante.nome) LIKE LOWER(CONCAT('%', :busca, '%')) " +
+            "OR i.participante.cpf LIKE CONCAT('%', :busca, '%'))")
+    Page<Inscricao> findByEventoIdAndBusca(Long eventoId, String busca, Pageable pageable);
 }

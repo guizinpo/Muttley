@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mutley — Evento</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body class="app-page">
+<aside class="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">🎓</span><span>Mutley</span></div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Principal</div>
+        <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+        <div class="nav-section-label">Participantes</div>
+        <a href="participantes.html" class="nav-item">🔍 Consultar</a>
+        <div class="nav-section-label">Eventos</div>
+        <a href="eventos.html" class="nav-item">🔍 Consultar</a>
+        <a href="evento-form.html" class="nav-item active">➕ Cadastrar</a>
+        <div class="nav-section-label">Medalhas</div>
+        <a href="medalhas.html" class="nav-item">🏅 Medalhas</a>
+    </nav>
+    <div class="sidebar-footer"><a href="login.html" class="nav-item logout">⬅ Sair</a></div>
+</aside>
+
+<main class="main-content">
+    <header class="topbar">
+        <h2 id="page-title">Cadastrar Evento</h2>
+        <div class="topbar-user">👤 Administrador</div>
+    </header>
+
+    <div class="page-body">
+        <div class="section-box form-container">
+            <nav class="breadcrumb">
+                <a href="eventos.html">Eventos</a> › <span id="breadcrumb-end">Cadastrar</span>
+            </nav>
+
+            <form id="form-evento" onsubmit="salvar(event)" novalidate>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tipo">Tipo <span class="required">*</span></label>
+                        <select id="tipo" required>
+                            <option value="">Selecione...</option>
+                            <option value="PALESTRA">Palestra</option>
+                            <option value="WORKSHOP">Workshop</option>
+                            <option value="SEMINARIO">Seminário</option>
+                            <option value="MINICURSO">Minicurso</option>
+                            <option value="FATEC_PORTAS_ABERTAS">Fatec Portas Abertas</option>
+                        </select>
+                        <span class="field-error" id="err-tipo"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="area">Área <span class="required">*</span></label>
+                        <input type="text" id="area" placeholder="Ex.: Tecnologia, Saúde, Direito" required/>
+                        <span class="field-error" id="err-area"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group-full">
+                        <label for="descricao">Descrição <span class="required">*</span></label>
+                        <textarea id="descricao" rows="3" placeholder="Descreva o evento em pelo menos 10 caracteres..."
+                                  required></textarea>
+                        <span class="field-error" id="err-descricao"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="palestrante">Palestrante <span class="required">*</span></label>
+                        <select id="palestrante" required>
+                            <option value="">Selecione um palestrante...</option>
+                        </select>
+                        <span class="field-error" id="err-palestrante"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="pontos">Pontos <span class="required">*</span></label>
+                        <input type="number" id="pontos" min="0" step="0.5" placeholder="Ex.: 2.0" required/>
+                        <span class="field-error" id="err-pontos"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="data-evento">Data do Evento <span class="required">*</span></label>
+                        <input type="date" id="data-evento" required/>
+                        <span class="field-error" id="err-data-evento"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="hora-inicio">Horário de Início <span class="required">*</span></label>
+                        <input type="time" id="hora-inicio" required/>
+                        <span class="field-error" id="err-hora-inicio"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="hora-fim">Horário de Fim <span class="required">*</span></label>
+                        <input type="time" id="hora-fim" required/>
+                        <span class="field-error" id="err-hora-fim"></span>
+                    </div>
+                </div>
+
+                <div id="qrcode-section" class="qrcode-box hidden">
+                    <p style="font-weight:600;margin-bottom:14px;color:var(--gray-700);">QR Codes gerados
+                        automaticamente:</p>
+                    <div class="qrcode-dual">
+                        <div class="qrcode-dual-item qrcode-inscricao">
+                            <div class="qrcode-dual-label">📋 QR de Inscrição</div>
+                            <div class="qrcode-dual-hint">Divulgar antes do evento</div>
+                            <img id="img-qr-inscricao" src="" width="100" height="100"/>
+                            <span class="qrcode-url" style="font-size:0.72rem;">inscricao/<strong
+                                    id="token-inscricao"></strong></span>
+                            <button type="button" class="btn btn-ghost btn-sm" onclick="copiarLink('inscricao')">📋
+                                Copiar link
+                            </button>
+                        </div>
+                        <div class="qrcode-dual-item qrcode-participacao">
+                            <div class="qrcode-dual-label">✅ QR de Participação</div>
+                            <div class="qrcode-dual-hint">Exibir ao final do evento</div>
+                            <img id="img-qr-participacao" src="" width="100" height="100"/>
+                            <span class="qrcode-url" style="font-size:0.72rem;">participacao/<strong
+                                    id="token-participacao"></strong></span>
+                            <button type="button" class="btn btn-ghost btn-sm" onclick="copiarLink('participacao')">📋
+                                Copiar link
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="toast-sucesso" class="toast toast-success hidden">✅ Evento salvo com sucesso!</div>
+                <div id="toast-copiado" class="toast toast-info hidden">📋 Link copiado!</div>
+
+                <div class="form-actions">
+                    <a href="eventos.html" class="btn btn-ghost">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+    const BASE_URL = 'http://localhost:8080';
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('id');
+    let eventoAtual = null;
+
+    function carregarPalestrantes() {
+      fetch(`${BASE_URL}/api/participantes?tipo=PALESTRANTE&size=100`)
+        .then(res => res.json())
+        .then(data => {
+          const select = document.getElementById('palestrante');
+          data.content.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.id;
+            option.textContent = p.nome;
+            select.appendChild(option);
+          });
+          if (editId) carregarEvento();
+        });
+    }
+
+    function carregarEvento() {
+      fetch(`${BASE_URL}/api/eventos/${editId}`)
+        .then(res => res.json())
+        .then(ev => {
+          eventoAtual = ev;
+          document.getElementById('page-title').textContent = 'Editar Evento';
+          document.getElementById('breadcrumb-end').textContent = 'Editar';
+          document.querySelector('.nav-item.active').classList.remove('active');
+          document.querySelector('a[href="eventos.html"]').classList.add('active');
+
+          document.getElementById('tipo').value = ev.tipo;
+          document.getElementById('area').value = ev.area;
+          document.getElementById('descricao').value = ev.descricao;
+          document.getElementById('palestrante').value = ev.palestrante.id;
+          document.getElementById('pontos').value = ev.pontos;
+          document.getElementById('data-evento').value = ev.dataEvento;
+          document.getElementById('hora-inicio').value = ev.horaInicio.substring(0, 5);
+          document.getElementById('hora-fim').value = ev.horaFim.substring(0, 5);
+
+          document.getElementById('token-inscricao').textContent = ev.qrCodeInscricao;
+          document.getElementById('token-participacao').textContent = ev.qrCodeParticipacao;
+          document.getElementById('img-qr-inscricao').src =
+            `${BASE_URL}/api/eventos/${editId}/qrcode/inscricao?baseUrl=${encodeURIComponent(window.location.origin)}`;
+          document.getElementById('img-qr-participacao').src =
+            `${BASE_URL}/api/eventos/${editId}/qrcode/participacao?baseUrl=${encodeURIComponent(window.location.origin)}`;
+          document.getElementById('qrcode-section').classList.remove('hidden');
+        });
+    }
+
+    function salvar(e) {
+      e.preventDefault();
+      let valido = true;
+
+      const inicio = document.getElementById('hora-inicio').value;
+      const fim = document.getElementById('hora-fim').value;
+
+      const campos = [
+        { id: 'tipo', errId: 'err-tipo', msg: 'Selecione o tipo.', check: v => v !== '' },
+        { id: 'area', errId: 'err-area', msg: 'Informe a área.', check: v => v.trim().length > 0 },
+        { id: 'descricao', errId: 'err-descricao', msg: 'Descrição deve ter no mínimo 10 caracteres.', check: v => v.trim().length >= 10 },
+        { id: 'palestrante', errId: 'err-palestrante', msg: 'Selecione o palestrante.', check: v => v !== '' },
+        { id: 'pontos', errId: 'err-pontos', msg: 'Informe os pontos (≥ 0).', check: v => v !== '' && parseFloat(v) >= 0 },
+        { id: 'data-evento', errId: 'err-data-evento', msg: 'Informe a data do evento.', check: v => v !== '' },
+        { id: 'hora-inicio', errId: 'err-hora-inicio', msg: 'Informe o horário de início.', check: v => v !== '' },
+        { id: 'hora-fim', errId: 'err-hora-fim', msg: inicio && fim && fim <= inicio ? 'O horário de fim deve ser após o início.' : 'Informe o horário de fim.', check: v => v !== '' && (!inicio || v > inicio) },
+      ];
+
+      campos.forEach(c => {
+        const val = document.getElementById(c.id).value;
+        const errEl = document.getElementById(c.errId);
+        if (!c.check(val)) {
+          errEl.textContent = c.msg;
+          document.getElementById(c.id).classList.add('input-error');
+          valido = false;
+        } else {
+          errEl.textContent = '';
+          document.getElementById(c.id).classList.remove('input-error');
+        }
+      });
+
+      if (!valido) return;
+
+      const body = {
+        tipo: document.getElementById('tipo').value,
+        area: document.getElementById('area').value,
+        descricao: document.getElementById('descricao').value,
+        palestrante: { id: parseInt(document.getElementById('palestrante').value) },
+        pontos: parseFloat(document.getElementById('pontos').value),
+        dataEvento: document.getElementById('data-evento').value,
+        horaInicio: document.getElementById('hora-inicio').value,
+        horaFim: document.getElementById('hora-fim').value
+      };
+
+      const url = editId ? `${BASE_URL}/api/eventos/${editId}` : `${BASE_URL}/api/eventos`;
+      const method = editId ? 'PUT' : 'POST';
+
+      fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+        .then(res => res.json())
+        .then(ev => {
+          document.getElementById('toast-sucesso').classList.remove('hidden');
+          setTimeout(() => { window.location.href = 'eventos.html'; }, 2000);
+        })
+        .catch(() => alert('Erro ao salvar evento.'));
+    }
+
+    function copiarLink(tipo) {
+      const token = tipo === 'inscricao'
+        ? document.getElementById('token-inscricao').textContent
+        : document.getElementById('token-participacao').textContent;
+      const url = `${window.location.origin}/inscricao.html?token=${token}`;
+      navigator.clipboard.writeText(url);
+      const t = document.getElementById('toast-copiado');
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 2000);
+    }
+
+    carregarPalestrantes();
+</script>
+</body>
+</html>
