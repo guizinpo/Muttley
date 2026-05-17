@@ -11,6 +11,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import br.com.fatec.muttley.Muttley.dto.ParticipanteDetalheDTO;
+import br.com.fatec.muttley.Muttley.service.InscricaoService;
+import br.com.fatec.muttley.Muttley.service.RegrasMedalhaService;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/participantes")
@@ -18,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class ParticipanteController {
     private final ParticipanteService service;
+
+    private final InscricaoService inscricaoService;
+    private final RegrasMedalhaService regrasMedalhaService;
 
     @GetMapping
     public ResponseEntity<Page<Participante>> listar(
@@ -28,8 +35,29 @@ public class ParticipanteController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Participante> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(service.buscarPorId(id));
+    public ResponseEntity<ParticipanteDetalheDTO> buscarPorId(
+            @PathVariable Long id,
+            @RequestParam(required = false, defaultValue = "0") int ano,
+            @RequestParam(required = false, defaultValue = "0") int semestre) {
+
+        Participante participante = service.buscarPorId(id);
+
+        int anoConsulta = ano == 0 ? LocalDate.now().getYear() : ano;
+        int semestreConsulta = semestre == 0 ? (LocalDate.now().getMonthValue() <= 6 ? 1 : 2) : semestre;
+
+        Double pontos = inscricaoService.calcularPontos(participante.getId(), anoConsulta, semestreConsulta);
+        String medalha = regrasMedalhaService.calcularMedalha(pontos);
+
+        ParticipanteDetalheDTO dto = new ParticipanteDetalheDTO();
+        dto.setId(participante.getId());
+        dto.setNome(participante.getNome());
+        dto.setCpf(participante.getCpf());
+        dto.setEmail(participante.getEmail());
+        dto.setTipo(participante.getTipo());
+        dto.setPontuacaoSemestre(pontos);
+        dto.setMedalha(medalha);
+
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping

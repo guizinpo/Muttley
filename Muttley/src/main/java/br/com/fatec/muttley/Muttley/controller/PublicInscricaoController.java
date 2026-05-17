@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import br.com.fatec.muttley.Muttley.dto.InscricaoPublicaDTO;
 
 @RestController
 @RequestMapping("/api/public")
@@ -28,7 +29,14 @@ public class PublicInscricaoController {
     @PostMapping("/inscricao/{token}")
     public ResponseEntity<Inscricao> inscrever(
             @PathVariable String token,
-            @RequestBody @Valid Participante participante) {
+            @RequestBody @Valid InscricaoPublicaDTO dto) {
+
+        Participante participante = new Participante();
+        participante.setNome(dto.getNome());
+        participante.setCpf(dto.getCpf());
+        participante.setEmail(dto.getEmail());
+        participante.setTipo(dto.getTipo());
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(inscricaoService.inscreverViaQrCode(token, participante));
     }
