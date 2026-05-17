@@ -2,6 +2,7 @@ package br.com.fatec.muttley.Muttley.controller;
 
 import br.com.fatec.muttley.Muttley.entity.Inscricao;
 import br.com.fatec.muttley.Muttley.service.CertificadoService;
+import br.com.fatec.muttley.Muttley.service.EmailService;
 import br.com.fatec.muttley.Muttley.service.InscricaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ public class InscricaoController {
 
     private final InscricaoService service;
     private final CertificadoService certificadoService;
+    private final EmailService emailService;
 
     @GetMapping("/evento/{eventoId}")
     public ResponseEntity<Page<Inscricao>> listarPorEvento(
@@ -41,5 +43,11 @@ public class InscricaoController {
                 .header("Content-Type", "application/pdf")
                 .header("Content-Disposition", "attachment; filename=certificado.pdf")
                 .body(pdf);
+    }
+
+    @PostMapping("/{id}/enviar-certificado")
+    public ResponseEntity<Void> enviarCertificado(@PathVariable Long id) {
+        emailService.enviarCertificado(id);
+        return ResponseEntity.ok().build();
     }
 }
