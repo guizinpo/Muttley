@@ -6,6 +6,7 @@ import br.com.fatec.muttley.Muttley.enums.StatusInscricao;
 import br.com.fatec.muttley.Muttley.repository.InscricaoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import br.com.fatec.muttley.Muttley.dto.MedalhaResultadoDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ public class MedalhaService {
     private final InscricaoRepository inscricaoRepository;
     private final RegrasMedalhaService regrasMedalhaService;
 
-    public List<Map<String, Object>> calcularMedalhasSemestre(int ano, int semestre) {
+    public List<MedalhaResultadoDTO> calcularMedalhasSemestre(int ano, int semestre) {
         List<Inscricao> inscricoes = inscricaoRepository
                 .findByStatusAndSemestre(StatusInscricao.CONCLUIDO, ano, semestre);
 
@@ -31,25 +32,20 @@ public class MedalhaService {
             pontosPorParticipante.put(participante, pontosAtuais + inscricao.getEvento().getPontos());
         }
 
-        List<Map<String, Object>> resultado = new ArrayList<>();
+        List<MedalhaResultadoDTO> resultado = new ArrayList<>();
 
         for (Map.Entry<Participante, Double> entry : pontosPorParticipante.entrySet()) {
             Participante participante = entry.getKey();
             Double pontos = entry.getValue();
             String medalha = regrasMedalhaService.calcularMedalha(pontos);
-
-            Map<String, Object> item = new HashMap<>();
-            item.put("participante", participante.getNome());
-            item.put("cpf", participante.getCpf());
-            item.put("pontos", pontos);
-            item.put("medalha", medalha);
-
-            resultado.add(item);
+            resultado.add(new MedalhaResultadoDTO(
+                    participante.getNome(),
+                    participante.getCpf(),
+                    pontos,
+                    medalha));
         }
 
-        resultado.sort((a, b) -> Double.compare(
-                (Double) b.get("pontos"),
-                (Double) a.get("pontos")));
+        resultado.sort((a, b) -> Double.compare(b.getPontos(), a.getPontos()));
 
         return resultado;
     }

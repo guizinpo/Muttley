@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import br.com.fatec.muttley.Muttley.dto.MedalhaResultadoDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class MedalhaController {
     }
 
     @GetMapping("/calcular")
-    public ResponseEntity<List<Map<String, Object>>> calcular(
+    public ResponseEntity<List<MedalhaResultadoDTO>> calcular(
             @RequestParam int ano,
             @RequestParam int semestre) {
         return ResponseEntity.ok(medalhaService.calcularMedalhasSemestre(ano, semestre));
