@@ -1,6 +1,7 @@
 package br.com.fatec.muttley.Muttley.controller;
 
 import br.com.fatec.muttley.Muttley.entity.Inscricao;
+import br.com.fatec.muttley.Muttley.service.CertificadoService;
 import br.com.fatec.muttley.Muttley.service.InscricaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class InscricaoController {
 
     private final InscricaoService service;
+    private final CertificadoService certificadoService;
 
     @GetMapping("/evento/{eventoId}")
     public ResponseEntity<Page<Inscricao>> listarPorEvento(
@@ -30,5 +32,14 @@ public class InscricaoController {
             @RequestParam int ano,
             @RequestParam int semestre) {
         return ResponseEntity.ok(service.calcularPontos(participanteId, ano, semestre));
+    }
+
+    @GetMapping("/{id}/certificado")
+    public ResponseEntity<byte[]> gerarCertificado(@PathVariable Long id) {
+        byte[] pdf = certificadoService.gerarCertificado(id);
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "attachment; filename=certificado.pdf")
+                .body(pdf);
     }
 }
