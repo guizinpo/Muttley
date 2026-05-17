@@ -20,6 +20,10 @@ public interface InscricaoRepository extends JpaRepository<Inscricao, Long> {
 
     Page<Inscricao> findByEventoId(Long eventoId, Pageable pageable);
 
+    Page<Inscricao> findByParticipanteId(Long participanteId, Pageable pageable);
+
+    long countByEventoId(Long eventoId);
+
     @Query("SELECT SUM(i.evento.pontos) FROM Inscricao i " +
             "WHERE i.participante.id = :participanteId " +
             "AND i.status = :status " +

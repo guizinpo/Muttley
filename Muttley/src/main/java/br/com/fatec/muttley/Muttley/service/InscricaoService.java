@@ -78,4 +78,9 @@ public class InscricaoService {
         inscricao.setStatus(StatusInscricao.CONCLUIDO);
         return repository.save(inscricao);
     }
+
+    public Page<Inscricao> listarPorParticipante(Long participanteId, Pageable pageable) {
+        participanteService.buscarPorId(participanteId);
+        return repository.findByParticipanteId(participanteId, pageable);
+    }
 }

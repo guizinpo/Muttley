@@ -1,8 +1,11 @@
 package br.com.fatec.muttley.Muttley.service;
 
+import br.com.fatec.muttley.Muttley.dto.EventoResumoDTO;
 import br.com.fatec.muttley.Muttley.entity.Evento;
 import br.com.fatec.muttley.Muttley.enums.TipoEvento;
 import br.com.fatec.muttley.Muttley.repository.EventoRepository;
+import br.com.fatec.muttley.Muttley.dto.EventoResumoDTO;
+import br.com.fatec.muttley.Muttley.repository.InscricaoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,16 +22,23 @@ import java.util.UUID;
 public class EventoService {
 
     private final EventoRepository repository;
+    private final InscricaoRepository inscricaoRepository;
 
     public List<Evento> listarProximos() {
         return repository.findProximosEventos(LocalDate.now());
     }
 
-    public Page<Evento> listar(TipoEvento tipo, Pageable pageable) {
+    public Page<EventoResumoDTO> listar(TipoEvento tipo, Pageable pageable) {
+        Page<Evento> eventos;
         if (tipo != null) {
-            return repository.findByTipo(tipo, pageable);
+            eventos = repository.findByTipo(tipo, pageable);
+        } else {
+            eventos = repository.findAll(pageable);
         }
-        return repository.findAll(pageable);
+        return eventos.map(evento -> {
+            long inscritos = inscricaoRepository.countByEventoId(evento.getId());
+            return EventoResumoDTO.de(evento, inscritos);
+        });
     }
 
     public Evento buscarPorId(Long id) {

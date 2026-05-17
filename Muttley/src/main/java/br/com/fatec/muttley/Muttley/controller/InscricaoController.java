@@ -50,4 +50,11 @@ public class InscricaoController {
         emailService.enviarCertificado(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/participante/{participanteId}")
+    public ResponseEntity<Page<Inscricao>> listarPorParticipante(
+            @PathVariable Long participanteId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.listarPorParticipante(participanteId, pageable));
+    }
 }

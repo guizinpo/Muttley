@@ -1,5 +1,6 @@
 package br.com.fatec.muttley.Muttley.controller;
 
+import br.com.fatec.muttley.Muttley.dto.EventoResumoDTO;
 import br.com.fatec.muttley.Muttley.entity.Evento;
 import br.com.fatec.muttley.Muttley.enums.TipoEvento;
 import br.com.fatec.muttley.Muttley.service.EventoService;
@@ -30,7 +31,7 @@ public class EventoController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Evento>> listar(
+    public ResponseEntity<Page<EventoResumoDTO>> listar(
             @RequestParam(required = false) TipoEvento tipo,
             @PageableDefault(size = 10, sort = "dataEvento") Pageable pageable) {
         return ResponseEntity.ok(service.listar(tipo, pageable));
