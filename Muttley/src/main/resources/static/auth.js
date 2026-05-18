@@ -32,3 +32,8 @@ function checkAuth() {
     window.location.href = 'login.html';
   }
 }
+
+function logout() {
+  sessionStorage.removeItem('token');
+  window.location.href = 'login.html';
+}
