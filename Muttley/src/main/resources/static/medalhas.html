@@ -358,20 +358,19 @@
     }
 
     function gerarTodos() {
-      const [ano, semestre] = document.getElementById('semestre').value.split('-');
-      fetch(`${BASE_URL}/api/medalhas/exportar?ano=${ano}&semestre=${semestre}`)
-        .then(res => res.blob())
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `medalhas_${semestre}_${ano}.csv`;
-          a.click();
-          window.URL.revokeObjectURL(url);
-          const t = document.getElementById('toast-gerado');
-          t.classList.remove('hidden');
-          setTimeout(() => t.classList.add('hidden'), 5000);
-        });
+        const [ano, semestre] = document.getElementById('semestre').value.split('-');
+
+        fetch(`${BASE_URL}/api/medalhas/enviar-certificados?ano=${ano}&semestre=${semestre}`, {
+            method: 'POST'
+        })
+        .then(res => {
+          if (res.ok) {
+            const t = document.getElementById('toast-gerado');
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 5000);
+          }
+        })
+        .catch(() => alert('Erro ao enviar certificados.'));
     }
 
     function exportarCSVMedalhas() {

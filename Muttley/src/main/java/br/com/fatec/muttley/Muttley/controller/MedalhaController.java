@@ -51,6 +51,10 @@ public class MedalhaController {
         List<MedalhaResultadoDTO> resultado = medalhaService.calcularMedalhasSemestre(ano, semestre);
 
         StringBuilder csv = new StringBuilder();
+        csv.append("RELATÓRIO DE MEDALHAS\n");
+        csv.append("Semestre:,").append(semestre).append("º / ").append(ano).append("\n");
+        csv.append("Total de participantes:,").append(resultado.size()).append("\n");
+        csv.append("\n");
         csv.append("Participante,CPF,Pontos,Medalha\n");
 
         for (MedalhaResultadoDTO item : resultado) {
@@ -67,5 +71,13 @@ public class MedalhaController {
                 .header("Content-Type", "text/csv; charset=UTF-8")
                 .header("Content-Disposition", "attachment; filename=medalhas_" + semestre + "_" + ano + ".csv")
                 .body(bytes);
+    }
+
+    @PostMapping("/enviar-certificados")
+    public ResponseEntity<Void> enviarCertificados(
+            @RequestParam int ano,
+            @RequestParam int semestre) {
+        medalhaService.enviarCertificadosTodos(ano, semestre);
+        return ResponseEntity.ok().build();
     }
 }

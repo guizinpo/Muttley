@@ -19,12 +19,14 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CertificadoService {
 
     private final InscricaoRepository inscricaoRepository;
+    private final RegrasMedalhaService regrasMedalhaService;
 
     public byte[] gerarCertificado(Long inscricaoId) {
         Inscricao inscricao = inscricaoRepository.findById(inscricaoId)
@@ -92,6 +94,27 @@ public class CertificadoService {
                             .setFont(fonteNormal))
                     .add(new Text(inscricao.getEvento().getPontos() + " pontos")
                             .setFont(fonteBold))
+                    .setFontSize(12)
+                    .setTextAlignment(TextAlignment.CENTER));
+
+            Double pontosTotais = 0.0;
+            List<Inscricao> todasInscricoes = inscricaoRepository
+                    .findByParticipanteId(inscricao.getParticipante().getId(),
+                            org.springframework.data.domain.Pageable.unpaged()).getContent();
+            for (Inscricao i : todasInscricoes) {
+                if (i.getStatus().name().equals("CONCLUIDO")) {
+                    pontosTotais += i.getEvento().getPontos();
+                }
+            }
+            String medalha = regrasMedalhaService.calcularMedalha(pontosTotais);
+            String medalhaTexto = medalha != null ? medalha : "Sem medalha";
+
+            document.add(new Paragraph(
+                    new Text("Medalha do semestre: ")
+                            .setFont(fonteNormal))
+                    .add(new Text(medalhaTexto)
+                            .setFont(fonteBold)
+                            .setFontColor(ColorConstants.ORANGE))
                     .setFontSize(12)
                     .setTextAlignment(TextAlignment.CENTER));
 

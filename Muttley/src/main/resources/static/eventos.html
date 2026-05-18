@@ -112,7 +112,7 @@
               <td>${dataFormatada} ${horario}</td>
               <td>${ev.pontos.toFixed(1)}</td>
               <td><span class="badge badge-gray">${ev.inscritos}</span></td>
-              <td>
+              <td style="white-space:nowrap;">
                 <a href="evento-detalhes.html?id=${ev.id}" class="btn btn-sm btn-ghost">👁 Ver</a>
                 <a href="evento-form.html?id=${ev.id}" class="btn btn-sm btn-ghost">✏️ Editar</a>
                 <button class="btn btn-sm btn-danger-ghost" onclick="abrirModal(${ev.id}, '${ev.descricao}')">🗑️</button>

@@ -19,6 +19,7 @@ public class MedalhaService {
 
     private final InscricaoRepository inscricaoRepository;
     private final RegrasMedalhaService regrasMedalhaService;
+    private final EmailService emailService;
 
     public List<MedalhaResultadoDTO> calcularMedalhasSemestre(int ano, int semestre) {
         List<Inscricao> inscricoes = inscricaoRepository
@@ -48,5 +49,19 @@ public class MedalhaService {
         resultado.sort((a, b) -> Double.compare(b.getPontos(), a.getPontos()));
 
         return resultado;
+    }
+
+    public void enviarCertificadosTodos(int ano, int semestre) {
+        List<Inscricao> inscricoes = inscricaoRepository
+                .findByStatusAndSemestre(StatusInscricao.CONCLUIDO, ano, semestre);
+
+        for (Inscricao inscricao : inscricoes) {
+            try {
+                emailService.enviarCertificado(inscricao.getId());
+            } catch (Exception e) {
+                System.err.println("Erro ao enviar certificado para " +
+                        inscricao.getParticipante().getNome() + ": " + e.getMessage());
+            }
+        }
     }
 }
