@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Mutley — Evento</title>
     <link rel="stylesheet" href="style.css"/>
+    <script src="auth.js"></script>
 </head>
 <body class="app-page">
 <aside class="sidebar">
@@ -138,13 +139,14 @@
 </main>
 
 <script>
-    const BASE_URL = 'http://localhost:8080';
+    checkAuth();
+
     const params = new URLSearchParams(window.location.search);
     const editId = params.get('id');
     let eventoAtual = null;
 
     function carregarPalestrantes() {
-      fetch(`${BASE_URL}/api/participantes?tipo=PALESTRANTE&size=100`)
+      authFetch(`${BASE_URL}/api/participantes?tipo=PALESTRANTE&size=100`)
         .then(res => res.json())
         .then(data => {
           const select = document.getElementById('palestrante');
@@ -159,7 +161,7 @@
     }
 
     function carregarEvento() {
-      fetch(`${BASE_URL}/api/eventos/${editId}`)
+      authFetch(`${BASE_URL}/api/eventos/${editId}`)
         .then(res => res.json())
         .then(ev => {
           eventoAtual = ev;
@@ -234,7 +236,7 @@
       const url = editId ? `${BASE_URL}/api/eventos/${editId}` : `${BASE_URL}/api/eventos`;
       const method = editId ? 'PUT' : 'POST';
 
-      fetch(url, {
+      authFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

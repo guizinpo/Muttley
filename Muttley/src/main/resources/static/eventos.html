@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mutley — Eventos</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
 </head>
 <body class="app-page">
   <aside class="sidebar">
@@ -68,7 +69,8 @@
   </div>
 
   <script>
-    const BASE_URL = 'http://localhost:8080';
+    checkAuth();
+
     let paginaAtual = 0;
     let totalPaginas = 1;
     let selecionadoId = null;
@@ -87,7 +89,7 @@
     };
 
     function carregarEventos() {
-      fetch(`${BASE_URL}/api/eventos?page=${paginaAtual}&size=10`)
+      authFetch(`${BASE_URL}/api/eventos?page=${paginaAtual}&size=10`)
         .then(res => res.json())
         .then(data => {
           const tbody = document.getElementById('tbody-eventos');
@@ -142,7 +144,7 @@
     }
 
     function confirmarExclusao() {
-      fetch(`${BASE_URL}/api/eventos/${selecionadoId}`, { method: 'DELETE' })
+      authFetch(`${BASE_URL}/api/eventos/${selecionadoId}`, { method: 'DELETE' })
         .then(res => {
           if (res.ok) {
             fecharModal();

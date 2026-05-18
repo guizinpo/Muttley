@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Mutley — Detalhes do Evento</title>
     <link rel="stylesheet" href="style.css"/>
+    <script src="auth.js"></script>
 </head>
 <body class="app-page">
 <aside class="sidebar">
@@ -137,7 +138,8 @@
 </main>
 
 <script>
-    const BASE_URL = 'http://localhost:8080';
+    checkAuth();
+
     const params = new URLSearchParams(window.location.search);
     const eventoId = params.get('id');
     let paginaAtual = 0;
@@ -147,7 +149,7 @@
     const areaBadge = { 'Tecnologia': 'badge-blue', 'Direito': 'badge-purple', 'Saúde': 'badge-green' };
 
     function carregarEvento() {
-      fetch(`${BASE_URL}/api/eventos/${eventoId}`)
+      authFetch(`${BASE_URL}/api/eventos/${eventoId}`)
         .then(res => res.json())
         .then(ev => {
           document.getElementById('breadcrumb-nome').textContent = ev.descricao;
@@ -192,7 +194,7 @@
       let url = `${BASE_URL}/api/inscricoes/evento/${eventoId}?page=${paginaAtual}&size=10`;
       if (buscaAtual) url += `&busca=${encodeURIComponent(buscaAtual)}`;
 
-      fetch(url)
+      authFetch(url)
         .then(res => res.json())
         .then(data => {
           const tbody = document.getElementById('tbody-inscritos');
@@ -238,7 +240,7 @@
     }
 
     function baixarCertificado(inscricaoId) {
-      fetch(`${BASE_URL}/api/inscricoes/${inscricaoId}/certificado`)
+      authFetch(`${BASE_URL}/api/inscricoes/${inscricaoId}/certificado`)
         .then(res => res.blob())
         .then(blob => {
           const url = window.URL.createObjectURL(blob);

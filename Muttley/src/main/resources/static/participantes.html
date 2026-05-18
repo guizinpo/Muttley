@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mutley — Participantes</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
 </head>
 <body class="app-page">
   <aside class="sidebar">
@@ -61,7 +62,8 @@
   </main>
 
   <script>
-    const BASE_URL = 'http://localhost:8080';
+    checkAuth();
+
     let paginaAtual = 0;
     let totalPaginas = 1;
     let buscaAtual = '';
@@ -101,7 +103,7 @@
       if (buscaAtual) url += `&busca=${encodeURIComponent(buscaAtual)}`;
       if (tipoAtual) url += `&tipo=${tipoAtual}`;
 
-      fetch(url)
+      authFetch(url)
         .then(res => res.json())
         .then(data => {
           renderTabela(data.content);

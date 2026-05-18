@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mutley — Detalhes do Participante</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
 </head>
 <body class="app-page">
   <aside class="sidebar">
@@ -86,7 +87,8 @@
   </main>
 
   <script>
-    const BASE_URL = 'http://localhost:8080';
+    checkAuth();
+
     const params = new URLSearchParams(window.location.search);
     const participanteId = params.get('id');
     let paginaAtual = 0;
@@ -99,7 +101,7 @@
       const ano = new Date().getFullYear();
       const semestre = new Date().getMonth() < 6 ? 1 : 2;
 
-      fetch(`${BASE_URL}/api/participantes/${participanteId}?ano=${ano}&semestre=${semestre}`)
+      authFetch(`${BASE_URL}/api/participantes/${participanteId}?ano=${ano}&semestre=${semestre}`)
         .then(res => res.json())
         .then(p => {
           document.getElementById('breadcrumb-nome').textContent = p.nome;
@@ -132,7 +134,7 @@
         medalBadge.className = 'medal-badge';
       }
 
-      fetch(`${BASE_URL}/api/medalhas/regras`)
+      authFetch(`${BASE_URL}/api/medalhas/regras`)
         .then(res => res.json())
         .then(regras => {
           breakdown.innerHTML = `
@@ -144,7 +146,7 @@
     }
 
     function carregarInscricoes() {
-      fetch(`${BASE_URL}/api/inscricoes/participante/${participanteId}?page=${paginaAtual}&size=10`)
+      authFetch(`${BASE_URL}/api/inscricoes/participante/${participanteId}?page=${paginaAtual}&size=10`)
         .then(res => res.json())
         .then(data => {
           const tbody = document.getElementById('tbody-eventos-participante');
@@ -187,7 +189,7 @@
     }
 
     function baixarCertificado(inscricaoId) {
-      fetch(`${BASE_URL}/api/inscricoes/${inscricaoId}/certificado`)
+      authFetch(`${BASE_URL}/api/inscricoes/${inscricaoId}/certificado`)
         .then(res => res.blob())
         .then(blob => {
           const url = window.URL.createObjectURL(blob);

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mutley — Dashboard</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
 </head>
 <body class="app-page">
   <!-- Sidebar -->
@@ -59,7 +60,9 @@
   </main>
   
   <script>
-    fetch('http://localhost:8080/api/dashboard')
+    checkAuth()
+
+    authFetch('http://localhost:8080/api/dashboard')
       .then(res => res.json())
       .then(eventos => {
         const tabela = document.getElementById('tabela-eventos');

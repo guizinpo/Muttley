@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mutley — Login</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body class="auth-page">
+<div class="auth-card">
+    <div class="auth-logo">
+        <span class="logo-icon">🎓</span>
+        <h1>Mutley</h1>
+        <p>Gestão de Eventos Acadêmicos</p>
+    </div>
+
+    <form id="form-login" onsubmit="login(event)" novalidate>
+        <div class="form-group">
+            <label for="username">Usuário</label>
+            <input type="text" id="username" placeholder="Digite seu usuário" required/>
+            <span class="field-error" id="err-username"></span>
+        </div>
+        <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" placeholder="Digite sua senha" required/>
+            <span class="field-error" id="err-password"></span>
+        </div>
+
+        <div id="erro-login" class="error-msg hidden">Usuário ou senha inválidos.</div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top:16px;">Entrar</button>
+    </form>
+
+    <p class="powered-by">Powered by Mutley · Gestão de Eventos Acadêmicos</p>
+</div>
+
+<script>
+    const BASE_URL = 'http://localhost:8080';
+
+    if (sessionStorage.getItem('token')) {
+      window.location.href = 'dashboard.html';
+    }
+
+    function login(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      let valido = true;
+
+      if (!username.trim()) {
+        document.getElementById('err-username').textContent = 'Informe o usuário.';
+        valido = false;
+      } else {
+        document.getElementById('err-username').textContent = '';
+      }
+
+      if (!password.trim()) {
+        document.getElementById('err-password').textContent = 'Informe a senha.';
+        valido = false;
+      } else {
+        document.getElementById('err-password').textContent = '';
+      }
+
+      if (!valido) return;
+
+      fetch(`${BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+        .then(res => {
+          if (res.status === 401) {
+            document.getElementById('erro-login').classList.remove('hidden');
+            return null;
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (!data) return;
+          sessionStorage.setItem('token', data.token);
+          window.location.href = 'dashboard.html';
+        })
+        .catch(() => {
+          document.getElementById('erro-login').classList.remove('hidden');
+        });
+    }
+</script>
+</body>
+</html>
