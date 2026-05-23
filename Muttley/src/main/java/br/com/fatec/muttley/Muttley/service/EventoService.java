@@ -4,7 +4,6 @@ import br.com.fatec.muttley.Muttley.dto.EventoResumoDTO;
 import br.com.fatec.muttley.Muttley.entity.Evento;
 import br.com.fatec.muttley.Muttley.enums.TipoEvento;
 import br.com.fatec.muttley.Muttley.repository.EventoRepository;
-import br.com.fatec.muttley.Muttley.dto.EventoResumoDTO;
 import br.com.fatec.muttley.Muttley.repository.InscricaoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -75,6 +74,7 @@ public class EventoService {
         existente.setDataEvento(dados.getDataEvento());
         existente.setHoraInicio(dados.getHoraInicio());
         existente.setHoraFim(dados.getHoraFim());
+        existente.setModalidade(dados.getModalidade());
 
         return repository.save(existente);
     }

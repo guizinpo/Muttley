@@ -1,5 +1,6 @@
 package br.com.fatec.muttley.Muttley.entity;
 
+import br.com.fatec.muttley.Muttley.enums.Modalidade;
 import br.com.fatec.muttley.Muttley.enums.TipoEvento;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -31,10 +32,15 @@ public class Evento {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descricao;
 
+    @NotNull(message = "Modalidade é obrigatória")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Modalidade modalidade;
+
     @NotNull(message = "Palestrante é obrigatório")
     @ManyToOne
     @JoinColumn(name = "palestrante_id", nullable = false)
-    private Participante palestrante;
+    private Palestrante palestrante;
 
     @NotNull(message = "Pontos é obrigatório")
     @Positive(message = "Pontos deve ser maior que zero")
