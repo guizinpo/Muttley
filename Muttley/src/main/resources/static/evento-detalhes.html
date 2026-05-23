@@ -258,14 +258,15 @@
     }
 
     function copiarLink(tipo) {
-      const token = tipo === 'inscricao'
-        ? document.getElementById('token-inscricao').textContent
-        : document.getElementById('token-participacao').textContent;
-      const url = `${window.location.origin}/inscricao.html?token=${token}`;
-      navigator.clipboard.writeText(url);
-      const t = document.getElementById('toast-copiado');
-      t.classList.remove('hidden');
-      setTimeout(() => t.classList.add('hidden'), 2000);
+        const token = tipo === 'inscricao'
+            ? document.getElementById('token-inscricao').textContent
+            : document.getElementById('token-participacao').textContent;
+        const pagina = tipo === 'inscricao' ? 'inscricao.html' : 'participacao.html';
+        const url = `${window.location.origin}/${pagina}?token=${token}`;
+        navigator.clipboard.writeText(url);
+        const t = document.getElementById('toast-copiado');
+        t.classList.remove('hidden');
+        setTimeout(() => t.classList.add('hidden'), 2000);
     }
 
     function mudaTab(ev, tab) {
