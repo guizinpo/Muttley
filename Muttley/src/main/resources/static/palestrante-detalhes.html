@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mutley — Detalhes do Palestrante</title>
+    <link rel="stylesheet" href="style.css"/>
+    <script src="auth.js"></script>
+</head>
+<body class="app-page">
+<aside class="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">🎓</span><span>Mutley</span></div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Principal</div>
+        <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+        <div class="nav-section-label">Participantes</div>
+        <a href="participantes.html" class="nav-item">🔍 Consultar</a>
+        <div class="nav-section-label">Palestrantes</div>
+        <a href="palestrantes.html" class="nav-item active">🔍 Consultar</a>
+        <a href="palestrante-form.html" class="nav-item">➕ Cadastrar</a>
+        <div class="nav-section-label">Eventos</div>
+        <a href="eventos.html" class="nav-item">🔍 Consultar</a>
+        <div class="nav-section-label">Medalhas</div>
+        <a href="medalhas.html" class="nav-item">🏅 Medalhas</a>
+    </nav>
+    <div class="sidebar-footer"><a href="#" onclick="logout()" class="nav-item logout">⬅ Sair</a></div>
+</aside>
+
+<main class="main-content">
+    <header class="topbar">
+        <h2>Detalhes do Palestrante</h2>
+        <div class="topbar-user">👤 Administrador</div>
+    </header>
+
+    <div class="page-body">
+        <nav class="breadcrumb">
+            <a href="palestrantes.html">Palestrantes</a> › <span id="breadcrumb-nome"></span>
+        </nav>
+
+        <div class="section-box detail-info">
+            <h3 class="section-title">Dados do Palestrante</h3>
+            <div style="display:flex;gap:24px;align-items:flex-start;">
+                <img id="d-foto" src="" alt="Foto do palestrante"
+                     style="width:100px;height:100px;object-fit:cover;border-radius:50%;display:none;"/>
+                <dl class="detail-list" style="flex:1;">
+                    <dt>Nome</dt>
+                    <dd id="d-nome"></dd>
+                    <dt>E-mail</dt>
+                    <dd id="d-email"></dd>
+                    <dt>Empresa</dt>
+                    <dd id="d-empresa"></dd>
+                    <dt>LinkedIn</dt>
+                    <dd id="d-linkedin"></dd>
+                    <dt>Lattes</dt>
+                    <dd id="d-lattes"></dd>
+                    <dt>Bio</dt>
+                    <dd id="d-bio"></dd>
+                </dl>
+            </div>
+            <div class="detail-actions">
+                <a id="btn-editar" href="#" class="btn btn-ghost">✏️ Editar Palestrante</a>
+                <button id="btn-certificado" class="btn btn-primary" onclick="enviarCertificado()">📧 Enviar
+                    Certificado
+                </button>
+            </div>
+        </div>
+
+        <div class="section-box" style="margin-top:24px;">
+            <h3 class="section-title">Eventos em que palestrou</h3>
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Evento</th>
+                    <th>Tipo</th>
+                    <th>Área</th>
+                    <th>Data</th>
+                    <th>Pontos</th>
+                </tr>
+                </thead>
+                <tbody id="tbody-eventos"></tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+    checkAuth();
+
+    const params = new URLSearchParams(window.location.search);
+    const palestranteId = params.get('id');
+
+    if (!palestranteId) window.location.href = 'palestrantes.html';
+
+    function carregarPalestrante() {
+      authFetch(`${BASE_URL}/api/palestrantes/${palestranteId}`)
+        .then(res => res.json())
+        .then(p => {
+          document.getElementById('breadcrumb-nome').textContent = p.nome;
+          document.getElementById('d-nome').textContent = p.nome;
+          document.getElementById('d-email').textContent = p.email;
+          document.getElementById('d-empresa').textContent = p.empresa || '—';
+          document.getElementById('d-bio').textContent = p.bio || '—';
+          document.getElementById('btn-editar').href = `palestrante-form.html?id=${p.id}`;
+
+          const linkedin = document.getElementById('d-linkedin');
+          if (p.linkedin) {
+            linkedin.innerHTML = `<a href="https://${p.linkedin}" target="_blank">${p.linkedin}</a>`;
+          } else {
+            linkedin.textContent = '—';
+          }
+
+          const lattes = document.getElementById('d-lattes');
+          if (p.lattes) {
+            lattes.innerHTML = `<a href="https://${p.lattes}" target="_blank">${p.lattes}</a>`;
+          } else {
+            lattes.textContent = '—';
+          }
+
+          if (p.foto) {
+            const foto = document.getElementById('d-foto');
+            foto.src = p.foto;
+            foto.style.display = 'block';
+          }
+        });
+    }
+
+    function carregarEventos() {
+      authFetch(`${BASE_URL}/api/eventos?palestranteId=${palestranteId}&size=100`)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById('tbody-eventos');
+          tbody.innerHTML = '';
+
+          if (data.content.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Nenhum evento encontrado.</td></tr>';
+            return;
+          }
+
+          data.content.forEach(ev => {
+            const dataFormatada = new Date(ev.dataEvento).toLocaleDateString('pt-BR');
+            const tipoLabel = ev.tipo.charAt(0) + ev.tipo.slice(1).toLowerCase();
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><a href="evento-detalhes.html?id=${ev.id}" class="cpf-link">${ev.descricao}</a></td>
+              <td>${tipoLabel}</td>
+              <td>${ev.area}</td>
+              <td>${dataFormatada}</td>
+              <td>${ev.pontos.toFixed(1)}</td>`;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    function enviarCertificado() {
+      alert('Funcionalidade de certificado para palestrante em desenvolvimento!');
+    }
+
+    carregarPalestrante();
+    carregarEventos();
+</script>
+</body>
+</html>

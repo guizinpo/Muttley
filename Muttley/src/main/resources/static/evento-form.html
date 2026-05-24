@@ -15,9 +15,10 @@
         <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
         <div class="nav-section-label">Participantes</div>
         <a href="participantes.html" class="nav-item">🔍 Consultar</a>
+        <div class="nav-section-label">Palestrantes</div>
+        <a href="palestrantes.html" class="nav-item">🔍 Consultar</a>
         <div class="nav-section-label">Eventos</div>
         <a href="eventos.html" class="nav-item">🔍 Consultar</a>
-        <a href="evento-form.html" class="nav-item active">➕ Cadastrar</a>
         <div class="nav-section-label">Medalhas</div>
         <a href="medalhas.html" class="nav-item">🏅 Medalhas</a>
     </nav>
@@ -40,15 +41,17 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="tipo">Tipo <span class="required">*</span></label>
-                        <select id="tipo" required>
-                            <option value="">Selecione...</option>
-                            <option value="PALESTRA">Palestra</option>
-                            <option value="WORKSHOP">Workshop</option>
-                            <option value="SEMINARIO">Seminário</option>
-                            <option value="MINICURSO">Minicurso</option>
-                            <option value="FATEC_PORTAS_ABERTAS">Fatec Portas Abertas</option>
-                        </select>
+                        <input type="text" id="tipo" placeholder="Ex.: Palestra, Seminário, Fatec Portas Abertas" required>
                         <span class="field-error" id="err-tipo"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalidade">Modalidade <span class="required">*</span></label>
+                        <select id="modalidade" required>
+                            <option value="">Selecione...</option>
+                            <option value="PRESENCIAL">Presencial</option>
+                            <option value="REMOTO">Remoto</option>
+                        </select>
+                        <span class="field-error" id="err-modalidade"></span>
                     </div>
                     <div class="form-group">
                         <label for="area">Área <span class="required">*</span></label>
@@ -146,17 +149,18 @@
     let eventoAtual = null;
 
     function carregarPalestrantes() {
-      authFetch(`${BASE_URL}/api/participantes?tipo=PALESTRANTE&size=100`)
+    authFetch(`${BASE_URL}/api/palestrantes?size=100`)
         .then(res => res.json())
         .then(data => {
-          const select = document.getElementById('palestrante');
-          data.content.forEach(p => {
+        const select = document.getElementById('palestrante');
+        select.innerHTML = '<option value="">Selecione um palestrante...</option>';
+        data.content.forEach(p => {
             const option = document.createElement('option');
             option.value = p.id;
             option.textContent = p.nome;
             select.appendChild(option);
-          });
-          if (editId) carregarEvento();
+        });
+        if (editId) carregarEvento();
         });
     }
 
@@ -170,6 +174,7 @@
           document.querySelector('.nav-item.active').classList.remove('active');
           document.querySelector('a[href="eventos.html"]').classList.add('active');
 
+          document.getElementById('modalidade').value = ev.modalidade;
           document.getElementById('tipo').value = ev.tipo;
           document.getElementById('area').value = ev.area;
           document.getElementById('descricao').value = ev.descricao;
@@ -224,6 +229,7 @@
 
       const body = {
         tipo: document.getElementById('tipo').value,
+        modalidade: document.getElementById('modalidade').value,
         area: document.getElementById('area').value,
         descricao: document.getElementById('descricao').value,
         palestrante: { id: parseInt(document.getElementById('palestrante').value) },
@@ -244,7 +250,7 @@
         .then(res => res.json())
         .then(ev => {
           document.getElementById('toast-sucesso').classList.remove('hidden');
-          setTimeout(() => { window.location.href = 'eventos.html'; }, 2000);
+          setTimeout(() => { document.getElementById('toast-sucesso').classList.add('hidden'); }, 2000);
         })
         .catch(() => alert('Erro ao salvar evento.'));
     }
