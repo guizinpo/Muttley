@@ -40,11 +40,6 @@ public class InscricaoService {
     public Inscricao inscreverViaQrCode(String token, Participante dadosParticipante) {
         Evento evento = eventoService.buscarPorQrCodeInscricao(token);
 
-        if (dadosParticipante.getTipo() == TipoParticipante.PALESTRANTE) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Palestrantes não podem se inscrever como ouvintes");
-        }
-
         Participante participante = participanteService.buscarPorCpf(dadosParticipante.getCpf())
                 .orElseGet(() -> participanteService.salvar(dadosParticipante));
 
