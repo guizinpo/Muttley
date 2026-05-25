@@ -91,7 +91,7 @@
         })
         .then(ev => {
           if (!ev) return;
-          const tipoLabel = ev.tipo.charAt(0) + ev.tipo.slice(1).toLowerCase();
+          ev.tipo
           document.getElementById('ev-tipo').textContent = tipoLabel;
           document.getElementById('ev-descricao').textContent = ev.descricao;
           document.getElementById('ev-data').textContent = '📅 ' + new Date(ev.dataEvento).toLocaleDateString('pt-BR');

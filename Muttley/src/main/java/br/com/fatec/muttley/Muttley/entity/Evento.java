@@ -18,10 +18,9 @@ public class Evento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Tipo é obrigatório")
-    @Enumerated(EnumType.STRING)
+    @NotBlank(message = "Tipo é obrigatório")
     @Column(nullable = false)
-    private TipoEvento tipo;
+    private String tipo;
 
     @NotBlank(message = "Área é obrigatória")
     @Column(nullable = false)

@@ -132,7 +132,7 @@
 
           data.content.forEach(ev => {
             const dataFormatada = new Date(ev.dataEvento).toLocaleDateString('pt-BR');
-            const tipoLabel = ev.tipo.charAt(0) + ev.tipo.slice(1).toLowerCase();
+            ev.tipo
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td><a href="evento-detalhes.html?id=${ev.id}" class="cpf-link">${ev.descricao}</a></td>

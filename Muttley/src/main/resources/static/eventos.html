@@ -101,12 +101,12 @@
           data.content.forEach(ev => {
             const dataFormatada = new Date(ev.dataEvento).toLocaleDateString('pt-BR');
             const horario = ev.horaInicio.substring(0, 5);
-            const tipoLabel = ev.tipo.charAt(0) + ev.tipo.slice(1).toLowerCase().replace('_', ' ');
+            ev.tipo
             const tr = document.createElement('tr');
             tr.innerHTML = `
-              <td><span class="badge ${tipoBadge[ev.tipo] || ''}">${tipoLabel}</span></td>
+              <td><span class="badge badge-blue">${ev.tipo}</span></td>
               <td>${ev.descricao}</td>
-              <td><span class="badge ${areaBadge[ev.area] || ''}">${ev.area}</span></td>
+              <td><span class="badge badge-green">${ev.area}</span></span></td>
               <td>${ev.palestrante}</td>
               <td>${dataFormatada} ${horario}</td>
               <td>${ev.pontos.toFixed(1)}</td>

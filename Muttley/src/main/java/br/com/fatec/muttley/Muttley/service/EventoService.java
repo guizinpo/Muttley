@@ -2,7 +2,6 @@ package br.com.fatec.muttley.Muttley.service;
 
 import br.com.fatec.muttley.Muttley.dto.EventoResumoDTO;
 import br.com.fatec.muttley.Muttley.entity.Evento;
-import br.com.fatec.muttley.Muttley.enums.TipoEvento;
 import br.com.fatec.muttley.Muttley.repository.EventoRepository;
 import br.com.fatec.muttley.Muttley.repository.InscricaoRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +26,8 @@ public class EventoService {
         return repository.findProximosEventos(LocalDate.now());
     }
 
-    public Page<EventoResumoDTO> listar(TipoEvento tipo, Pageable pageable) {
-        Page<Evento> eventos;
-        if (tipo != null) {
-            eventos = repository.findByTipo(tipo, pageable);
-        } else {
-            eventos = repository.findAll(pageable);
-        }
+    public Page<EventoResumoDTO> listar(Pageable pageable) {
+        Page<Evento> eventos = repository.findAll(pageable);
         return eventos.map(evento -> {
             long inscritos = inscricaoRepository.countByEventoId(evento.getId());
             return EventoResumoDTO.de(evento, inscritos);

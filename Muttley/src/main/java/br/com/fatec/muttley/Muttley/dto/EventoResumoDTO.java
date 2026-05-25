@@ -20,7 +20,7 @@ public class EventoResumoDTO {
     public static EventoResumoDTO de(Evento evento, Long inscritos) {
         EventoResumoDTO dto = new EventoResumoDTO();
         dto.setId(evento.getId());
-        dto.setTipo(evento.getTipo().name());
+        dto.setTipo(evento.getTipo());
         dto.setDescricao(evento.getDescricao());
         dto.setArea(evento.getArea());
         dto.setPalestrante(evento.getPalestrante().getNome());
