@@ -158,7 +158,8 @@
           document.getElementById('btn-editar').href = `evento-form.html?id=${ev.id}`;
 
           const tipoEl = document.getElementById('d-tipo');
-          ev.tipo
+          document.getElementById('d-tipo').textContent = ev.tipo || '—';
+          document.getElementById('d-tipo').className = 'badge';
           tipoEl.className = `badge ${tipoBadge[ev.tipo] || ''}`;
 
           const areaEl = document.getElementById('d-area');
