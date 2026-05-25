@@ -23,4 +23,6 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     @Query("SELECT e FROM Evento e WHERE e.dataEvento >= :hoje ORDER BY e.dataEvento ASC")
     List<Evento> findProximosEventos(LocalDate hoje);
+
+    List<Evento> findByPalestranteId(Long palestranteId);
 }

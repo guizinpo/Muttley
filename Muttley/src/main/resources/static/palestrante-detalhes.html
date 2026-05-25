@@ -17,7 +17,6 @@
         <a href="participantes.html" class="nav-item">🔍 Consultar</a>
         <div class="nav-section-label">Palestrantes</div>
         <a href="palestrantes.html" class="nav-item active">🔍 Consultar</a>
-        <a href="palestrante-form.html" class="nav-item">➕ Cadastrar</a>
         <div class="nav-section-label">Eventos</div>
         <a href="eventos.html" class="nav-item">🔍 Consultar</a>
         <div class="nav-section-label">Medalhas</div>
@@ -152,7 +151,26 @@
     }
 
     function enviarCertificado() {
-      alert('Funcionalidade de certificado para palestrante em desenvolvimento!');
+        const btn = document.getElementById('btn-certificado');
+        btn.disabled = true;
+        btn.textContent = '⏳ Enviando...';
+
+        authFetch(`${BASE_URL}/api/palestrantes/${palestranteId}/enviar-certificado`, {
+            method: 'POST'
+        })
+            .then(res => {
+                if (res.ok) {
+                    btn.textContent = '✅ Enviado!';
+                    setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = '📧 Enviar Certificado';
+                }, 3000);
+            }
+        })
+        .catch(() => {
+            btn.textContent = '❌ Erro ao enviar';
+            btn.disabled = false;
+        });
     }
 
     carregarPalestrante();

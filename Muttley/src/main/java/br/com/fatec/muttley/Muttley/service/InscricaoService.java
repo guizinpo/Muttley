@@ -22,6 +22,7 @@ public class InscricaoService {
     private final InscricaoRepository repository;
     private final EventoService eventoService;
     private final ParticipanteService participanteService;
+    private final EmailService emailService;
 
     public Page<Inscricao> listarPorEvento(Long eventoId, String busca, Pageable pageable) {
         eventoService.buscarPorId(eventoId);
@@ -74,6 +75,11 @@ public class InscricaoService {
         }
 
         inscricao.setStatus(StatusInscricao.CONCLUIDO);
+        try {
+            emailService.enviarCertificado(inscricao.getId());
+        } catch (Exception e) {
+            System.err.println("Erro ao enviar certificado: " + e.getMessage());
+        }
         return repository.save(inscricao);
     }
 

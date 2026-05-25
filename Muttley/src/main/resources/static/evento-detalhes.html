@@ -70,7 +70,7 @@
                         <p class="qrcode-url-small">inscricao/<strong id="token-inscricao"></strong></p>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">
                             <button class="btn btn-ghost btn-sm" onclick="copiarLink('inscricao')">📋 Copiar</button>
-                            <button class="btn btn-sm btn-primary" onclick="abrirInscricao()">🔗 Abrir</button>
+                            <button class="btn btn-sm btn-primary" onclick="baixarQr('inscricao')">⬇️ Baixar</button>
                         </div>
                     </div>
                     <div class="qrcode-dual-item qrcode-participacao">
@@ -80,6 +80,7 @@
                         <p class="qrcode-url-small">participacao/<strong id="token-participacao"></strong></p>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">
                             <button class="btn btn-ghost btn-sm" onclick="copiarLink('participacao')">📋 Copiar</button>
+                            <button class="btn btn-sm btn-primary" onclick="baixarQr('participacao')">⬇️ Baixar</button>
                         </div>
                     </div>
                 </div>
@@ -281,6 +282,14 @@
       paginaAtual += direcao;
       carregarInscritos();
     }
+
+    function baixarQr(tipo) {
+    const img = document.getElementById(`img-qr-${tipo}`);
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = `qrcode-${tipo}.png`;
+    a.click();
+}
 
     carregarEvento();
     carregarInscritos();

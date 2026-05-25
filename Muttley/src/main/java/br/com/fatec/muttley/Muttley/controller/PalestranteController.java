@@ -1,6 +1,7 @@
 package br.com.fatec.muttley.Muttley.controller;
 
 import br.com.fatec.muttley.Muttley.entity.Palestrante;
+import br.com.fatec.muttley.Muttley.service.EmailService;
 import br.com.fatec.muttley.Muttley.service.PalestranteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class PalestranteController {
 
     private final PalestranteService service;
+    private final EmailService emailService;
 
     @GetMapping
     public ResponseEntity<Page<Palestrante>> listar(
@@ -47,5 +49,11 @@ public class PalestranteController {
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/enviar-certificado")
+    public ResponseEntity<Void> enviarCertificado(@PathVariable Long id) {
+        emailService.enviarCertificadoPalestrante(id);
+        return ResponseEntity.ok().build();
     }
 }
