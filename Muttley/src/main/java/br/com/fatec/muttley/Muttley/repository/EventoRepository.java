@@ -18,6 +18,8 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     Optional<Evento> findByQrCodeParticipacao(String token);
 
+    Page<Evento> findByPalestranteId(Long palestranteId, Pageable pageable);
+
     @Query("SELECT e FROM Evento e WHERE e.dataEvento >= :hoje ORDER BY e.dataEvento ASC")
     List<Evento> findProximosEventos(LocalDate hoje);
 

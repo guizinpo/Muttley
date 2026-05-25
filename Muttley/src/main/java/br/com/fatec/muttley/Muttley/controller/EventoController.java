@@ -35,6 +35,13 @@ public class EventoController {
         return ResponseEntity.ok(service.listar(pageable));
     }
 
+    @GetMapping("/palestrante/{palestranteId}")
+    public ResponseEntity<Page<EventoResumoDTO>> listarPorPalestrante(
+            @PathVariable Long palestranteId,
+            @PageableDefault(size = 10, sort = "dataEvento") Pageable pageable) {
+        return ResponseEntity.ok(service.listarPorPalestrante(palestranteId, pageable));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Evento> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.buscarPorId(id));

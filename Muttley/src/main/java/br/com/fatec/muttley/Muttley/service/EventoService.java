@@ -34,6 +34,13 @@ public class EventoService {
         });
     }
 
+    public Page<EventoResumoDTO> listarPorPalestrante(Long palestranteId, Pageable pageable) {
+        return repository.findByPalestranteId(palestranteId, pageable).map(evento -> {
+            long inscritos = inscricaoRepository.countByEventoId(evento.getId());
+            return EventoResumoDTO.de(evento, inscritos);
+        });
+    }
+
     public Evento buscarPorId(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Evento não encontrado"));
