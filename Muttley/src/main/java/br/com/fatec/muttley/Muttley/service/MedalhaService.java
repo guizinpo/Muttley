@@ -34,6 +34,7 @@ public class MedalhaService {
     }
 
     public Medalha salvar(Medalha medalha) {
+        validarSobreposicao(medalha, null);
         return medalhaRepository.save(medalha);
     }
 
@@ -43,6 +44,7 @@ public class MedalhaService {
         existente.setImagemUrl(dados.getImagemUrl());
         existente.setPontosMin(dados.getPontosMin());
         existente.setPontosMax(dados.getPontosMax());
+        validarSobreposicao(existente, id);
         return medalhaRepository.save(existente);
     }
 
@@ -88,6 +90,19 @@ public class MedalhaService {
 
         resultado.sort((a, b) -> Double.compare(b.getPontos(), a.getPontos()));
         return resultado;
+    }
+
+    private void validarSobreposicao(Medalha nova, Long idIgnorar) {
+        List<Medalha> existentes = medalhaRepository.findAllByOrderByPontosMinAsc();
+        for (Medalha m : existentes) {
+            if (idIgnorar != null && m.getId().equals(idIgnorar)) continue;
+            boolean sobrepos = nova.getPontosMin() <= m.getPontosMax() && nova.getPontosMax() >= m.getPontosMin();
+            if (sobrepos) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.CONFLICT,
+                        "Faixa de pontos conflita com a medalha '" + m.getNome() + "' (" + m.getPontosMin() + "–" + m.getPontosMax() + " pts)");
+            }
+        }
     }
 
     public void enviarCertificadosTodos(int ano, int semestre) {

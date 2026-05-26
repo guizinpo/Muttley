@@ -121,7 +121,7 @@
 
       const campos = [
         { id: 'nome', errId: 'err-nome', msg: 'Informe seu nome.', check: v => v.trim().length >= 3 },
-        { id: 'cpf', errId: 'err-cpf', msg: 'CPF inválido.', check: v => /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(v) },
+        { id: 'cpf', errId: 'err-cpf', msg: 'CPF inválido.', check: v => validarCPF(v) },
         { id: 'email', errId: 'err-email', msg: 'Informe um e-mail válido.', check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
         { id: 'tipo', errId: 'err-tipo', msg: 'Selecione o tipo.', check: v => v !== '' },
       ];
@@ -173,6 +173,20 @@
       document.getElementById(`estado-${estado}`).classList.remove('hidden');
     }
 
+    function validarCPF(cpf) {
+        const n = cpf.replace(/\D/g, '');
+        if (n.length !== 11 || /^(\d)\1{10}$/.test(n)) return false;
+        let soma = 0;
+        for (let i = 0; i < 9; i++) soma += parseInt(n[i]) * (10 - i);
+        let d1 = 11 - (soma % 11);
+        if (d1 >= 10) d1 = 0;
+        if (d1 !== parseInt(n[9])) return false;
+        soma = 0;
+        for (let i = 0; i < 10; i++) soma += parseInt(n[i]) * (11 - i);
+        let d2 = 11 - (soma % 11);
+        if (d2 >= 10) d2 = 0;
+        return d2 === parseInt(n[10]);
+    }
     carregarEvento();
 </script>
 </body>

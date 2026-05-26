@@ -66,8 +66,12 @@
 
                 <div class="form-row">
                     <div class="form-group form-group-full">
-                        <label for="foto">URL da Foto</label>
-                        <input type="text" id="foto" placeholder="https://..."/>
+                        <label for="foto">Foto</label>
+                        <input type="file" id="foto-arquivo" accept="image/*" onchange="previewFoto(this)"/>
+                        <div id="preview-foto" style="margin-top:8px;display:none;">
+                            <img id="img-preview-foto" src="" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:1px solid var(--gray-200);"/>
+                        </div>
+                        <input type="hidden" id="foto"/>
                     </div>
                 </div>
 
@@ -113,12 +117,16 @@
           document.getElementById('empresa').value = p.empresa || '';
           document.getElementById('linkedin').value = p.linkedin || '';
           document.getElementById('lattes').value = p.lattes || '';
-          document.getElementById('foto').value = p.foto || '';
+          if (p.foto) {
+            document.getElementById('foto').value = p.foto;
+            document.getElementById('img-preview-foto').src = p.foto;
+            document.getElementById('preview-foto').style.display = 'block';
+          }
           document.getElementById('bio').value = p.bio || '';
         });
     }
 
-    function salvar(e) {
+    async function salvar(e) {
       e.preventDefault();
       let valido = true;
 
@@ -141,6 +149,19 @@
       });
 
       if (!valido) return;
+
+      const fileInput = document.getElementById('foto-arquivo');
+      if (fileInput.files && fileInput.files[0]) {
+        const formData = new FormData();
+        formData.append('arquivo', fileInput.files[0]);
+        const token = sessionStorage.getItem('token');
+        const res = await fetch(`${BASE_URL}/api/medalhas/upload`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        });
+        document.getElementById('foto').value = await res.text();
+      }
 
       const body = {
         nome: document.getElementById('nome').value,
@@ -169,6 +190,17 @@
           document.getElementById('erro-geral').textContent = 'Erro ao salvar. Verifique os dados.';
           document.getElementById('erro-geral').classList.remove('hidden');
         });
+    }
+
+    function previewFoto(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('img-preview-foto').src = e.target.result;
+                document.getElementById('preview-foto').style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 </script>
 </body>

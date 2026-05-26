@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import br.com.fatec.muttley.Muttley.dto.ParticipanteDetalheDTO;
 import br.com.fatec.muttley.Muttley.service.InscricaoService;
-import br.com.fatec.muttley.Muttley.service.RegrasMedalhaService;
+import br.com.fatec.muttley.Muttley.service.MedalhaService;
 import java.time.LocalDate;
 
 @RestController
@@ -24,7 +24,7 @@ public class ParticipanteController {
     private final ParticipanteService service;
 
     private final InscricaoService inscricaoService;
-    private final RegrasMedalhaService regrasMedalhaService;
+    private final MedalhaService medalhaService;
 
     @GetMapping
     public ResponseEntity<Page<Participante>> listar(
@@ -46,7 +46,7 @@ public class ParticipanteController {
         int semestreConsulta = semestre == 0 ? (LocalDate.now().getMonthValue() <= 6 ? 1 : 2) : semestre;
 
         Double pontos = inscricaoService.calcularPontos(participante.getId(), anoConsulta, semestreConsulta);
-        String medalha = regrasMedalhaService.calcularMedalha(pontos);
+        String medalha = medalhaService.calcularMedalha(pontos);
 
         ParticipanteDetalheDTO dto = new ParticipanteDetalheDTO();
         dto.setId(participante.getId());

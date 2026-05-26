@@ -17,7 +17,7 @@
         <a href="eventos.html" class="nav-item">📅 Eventos</a>
         <a href="medalhas.html" class="nav-item active">🏅 Medalhas</a>
     </nav>
-    <a href="#" onclick="logout()" class="nav-item logout">⬅ Sair</a>
+    <div class="sidebar-footer"><a href="#" onclick="logout()" class="nav-item logout">⬅ Sair</a></div>
 </aside>
 
 <main class="main-content">
@@ -29,189 +29,121 @@
     <div class="page-body">
         <div class="section-box" style="padding-bottom:0;">
             <div class="tabs-header" style="border-bottom:none;">
-                <button class="tab-btn tab-active" onclick="mudaTab(event,'regras')">⚙️ Regras de Pontuação</button>
-                <button class="tab-btn" onclick="mudaTab(event,'gerar')">🏅 Gerar Medalhas</button>
+                <button class="tab-btn tab-active" onclick="mudaTab(event,'medalhas')">🏅 Medalhas</button>
+                <button class="tab-btn" onclick="mudaTab(event,'gerar')">🎓 Gerar Certificados</button>
             </div>
         </div>
 
-        <!-- ABA: REGRAS -->
-        <div id="tab-regras">
-            <div class="section-box form-container" style="max-width:680px;">
-                <p class="form-intro" style="margin-bottom:20px;">
-                    Configure os intervalos de pontos para cada medalha. Ao final do semestre, os pontos acumulados por
-                    cada participante nos eventos serão usados para atribuir a medalha correspondente.
-                </p>
-
-                <div class="medals-preview">
-                    <div class="medal-preview-card">
-                        <span class="medal-preview-icon">🥉</span>
-                        <span class="medal-preview-name">Bronze</span>
-                        <span class="medal-preview-range" id="range-bronze">1 – 4 pts</span>
+        <!-- ABA: MEDALHAS -->
+        <div id="tab-medalhas">
+            <div class="section-box">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <div>
+                        <h3 class="section-title" style="margin:0;">Medalhas Cadastradas</h3>
+                        <p style="font-size:0.875rem;color:var(--gray-500);margin:4px 0 0;">
+                            Cada medalha tem um nome, imagem e faixa de pontos. Ao final do semestre, participantes que atingirem a pontuação recebem a medalha correspondente.
+                        </p>
                     </div>
-                    <div class="medal-preview-card">
-                        <span class="medal-preview-icon">🥈</span>
-                        <span class="medal-preview-name">Prata</span>
-                        <span class="medal-preview-range" id="range-prata">5 – 8 pts</span>
-                    </div>
-                    <div class="medal-preview-card">
-                        <span class="medal-preview-icon">🥇</span>
-                        <span class="medal-preview-name">Ouro</span>
-                        <span class="medal-preview-range" id="range-ouro">9 – 12 pts</span>
-                    </div>
+                    <button class="btn btn-primary" onclick="abrirModalNova()">+ Nova Medalha</button>
                 </div>
 
-                <form id="form-pontuacao" onsubmit="salvarRegras(event)" novalidate>
-                    <div class="medal-form-row">
-                        <div class="medal-label"><span class="medal-icon-sm">🥉</span><strong>Bronze</strong></div>
-                        <div class="medal-inputs">
-                            <div class="form-group form-group-inline">
-                                <label for="bronze-min">De</label>
-                                <input type="number" id="bronze-min" min="0" step="0.5" value="1"
-                                       oninput="atualizarPreview()"/>
-                                <span class="field-error" id="err-bronze-min"></span>
-                            </div>
-                            <span class="range-separator">até</span>
-                            <div class="form-group form-group-inline">
-                                <label for="bronze-max">Até</label>
-                                <input type="number" id="bronze-max" min="0" step="0.5" value="4"
-                                       oninput="atualizarPreview()"/>
-                                <span class="field-error" id="err-bronze-max"></span>
-                            </div>
-                            <span class="unit-label">pontos</span>
-                        </div>
+                <div id="lista-medalhas" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;">
+                    <div style="text-align:center;color:var(--gray-400);padding:40px;grid-column:1/-1;" id="empty-medalhas">
+                        Nenhuma medalha cadastrada ainda.
                     </div>
-
-                    <div class="medal-form-row">
-                        <div class="medal-label"><span class="medal-icon-sm">🥈</span><strong>Prata</strong></div>
-                        <div class="medal-inputs">
-                            <div class="form-group form-group-inline">
-                                <label for="prata-min">De</label>
-                                <input type="number" id="prata-min" min="0" step="0.5" value="5"
-                                       oninput="atualizarPreview()"/>
-                                <span class="field-error" id="err-prata-min"></span>
-                            </div>
-                            <span class="range-separator">até</span>
-                            <div class="form-group form-group-inline">
-                                <label for="prata-max">Até</label>
-                                <input type="number" id="prata-max" min="0" step="0.5" value="8"
-                                       oninput="atualizarPreview()"/>
-                                <span class="field-error" id="err-prata-max"></span>
-                            </div>
-                            <span class="unit-label">pontos</span>
-                        </div>
-                    </div>
-
-                    <div class="medal-form-row">
-                        <div class="medal-label"><span class="medal-icon-sm">🥇</span><strong>Ouro</strong></div>
-                        <div class="medal-inputs">
-                            <div class="form-group form-group-inline">
-                                <label for="ouro-min">De</label>
-                                <input type="number" id="ouro-min" min="0" step="0.5" value="9"
-                                       oninput="atualizarPreview()"/>
-                                <span class="field-error" id="err-ouro-min"></span>
-                            </div>
-                            <span class="range-separator">até</span>
-                            <div class="form-group form-group-inline">
-                                <label for="ouro-max">Até</label>
-                                <input type="number" id="ouro-max" min="0" step="0.5" value="12"
-                                       oninput="atualizarPreview()"/>
-                                <span class="field-error" id="err-ouro-max"></span>
-                            </div>
-                            <span class="unit-label">pontos</span>
-                        </div>
-                    </div>
-
-                    <div id="aviso-sobreposicao" class="error-msg hidden" style="margin-top:12px;">
-                        ⚠️ Os intervalos estão sobrepostos ou incoerentes. Verifique os valores.
-                    </div>
-                    <div id="toast-regras" class="toast toast-success hidden" style="margin-top:16px;">✅ Regras salvas
-                        com sucesso!
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-ghost" onclick="restaurarPadrao()">↺ Restaurar Padrão
-                        </button>
-                        <button type="submit" class="btn btn-primary">Salvar Regras</button>
-                    </div>
-                </form>
+                </div>
             </div>
 
-            <div class="section-box" style="max-width:680px;">
-                <h3 class="section-title">ℹ️ Sobre a Sumarização</h3>
+            <div class="section-box" style="margin-top:16px;">
+                <h3 class="section-title">ℹ️ Como funciona</h3>
                 <ul class="info-list">
-                    <li>Os pontos são calculados com base nos eventos em que o participante se <strong>inscreveu e
-                        confirmou presença</strong>.
-                    </li>
-                    <li>A sumarização é realizada ao <strong>final de cada semestre</strong>.</li>
-                    <li>As medalhas são atribuídas automaticamente com base nos intervalos configurados acima.</li>
-                    <li>Participantes com pontuação abaixo do mínimo Bronze <strong>não recebem medalha</strong>.</li>
+                    <li>Os pontos são calculados com base nos eventos em que o participante <strong>confirmou presença</strong>.</li>
+                    <li>A geração de certificados de medalha é realizada <strong>ao final de cada semestre</strong>.</li>
+                    <li>Participantes com pontuação fora de qualquer faixa <strong>não recebem medalha</strong>.</li>
+                    <li>O certificado por evento é emitido <strong>na hora</strong>, ao escanear o QR de participação.</li>
                 </ul>
             </div>
         </div>
 
-        <!-- ABA: GERAR MEDALHAS -->
+        <!-- ABA: GERAR CERTIFICADOS -->
         <div id="tab-gerar" class="hidden">
             <div class="section-box" style="max-width:860px;">
-                <h3 class="section-title">Gerar Medalhas do Semestre</h3>
-                <p style="font-size:0.875rem;color:var(--gray-500);margin-bottom:20px;">
-                    Selecione o semestre de referência e clique em <strong>Calcular</strong> para visualizar a medalha
-                    de cada participante com base nos pontos acumulados. Depois, clique em <strong>Gerar
-                    Certificados</strong> para emitir os PDFs.
-                </p>
 
-                <div class="filter-bar" style="margin-bottom:20px;">
-                    <div class="form-group" style="min-width:200px;">
-                        <label for="semestre">Semestre de Referência</label>
-                        <select id="semestre">
-                            <option value="2026-1">1º Semestre / 2026</option>
-                            <option value="2025-2">2º Semestre / 2025</option>
-                            <option value="2025-1">1º Semestre / 2025</option>
-                        </select>
+                <!-- Toggle ativar/desativar -->
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--gray-50);border-radius:8px;margin-bottom:24px;border:1px solid var(--gray-200);">
+                    <div>
+                        <strong>Geração de Certificados de Medalha</strong>
+                        <p style="font-size:0.8rem;color:var(--gray-500);margin:2px 0 0;">
+                            Ative apenas no final do semestre para liberar o cálculo e envio dos certificados.
+                        </p>
                     </div>
-                    <div style="padding-top:22px;">
-                        <button class="btn btn-primary" onclick="calcular()">🔄 Calcular</button>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span id="label-status" style="font-size:0.875rem;color:var(--gray-500);">Inativo</span>
+                        <button id="btn-toggle" class="btn btn-ghost" onclick="toggleGeracao()">Ativar</button>
                     </div>
                 </div>
 
-                <div id="resultado-sumario" class="hidden">
-                    <div class="sumario-stats">
-                        <div class="sumario-stat">
-                            <span class="sumario-stat-val" id="stat-total">0</span>
-                            <span class="sumario-stat-label">Participantes avaliados</span>
+                <!-- Conteúdo bloqueado se inativo -->
+                <div id="gerar-bloqueado" style="text-align:center;padding:40px;color:var(--gray-400);">
+                    🔒 Ative a geração de certificados para acessar esta funcionalidade.
+                </div>
+
+                <!-- Conteúdo liberado se ativo -->
+                <div id="gerar-ativo" class="hidden">
+                    <h3 class="section-title">Gerar Medalhas do Semestre</h3>
+                    <p style="font-size:0.875rem;color:var(--gray-500);margin-bottom:20px;">
+                        Selecione o semestre de referência e clique em <strong>Calcular</strong> para ver a medalha de cada participante. Depois, clique em <strong>Gerar Certificados</strong> para emitir e enviar por e-mail.
+                    </p>
+
+                    <div class="filter-bar" style="margin-bottom:20px;">
+                        <div class="form-group" style="min-width:200px;">
+                            <label for="semestre">Semestre de Referência</label>
+                            <select id="semestre">
+                                <option value="2026-1">1º Semestre / 2026</option>
+                                <option value="2025-2">2º Semestre / 2025</option>
+                                <option value="2025-1">1º Semestre / 2025</option>
+                            </select>
                         </div>
-                        <div class="sumario-stat">
-                            <span class="sumario-stat-val" id="stat-bronze" style="color:#b45309;">🥉 0</span>
-                            <span class="sumario-stat-label">Bronze</span>
-                        </div>
-                        <div class="sumario-stat">
-                            <span class="sumario-stat-val" id="stat-prata" style="color:#4b5563;">🥈 0</span>
-                            <span class="sumario-stat-label">Prata</span>
-                        </div>
-                        <div class="sumario-stat">
-                            <span class="sumario-stat-val" id="stat-ouro" style="color:#92400e;">🥇 0</span>
-                            <span class="sumario-stat-label">Ouro</span>
+                        <div style="padding-top:22px;">
+                            <button class="btn btn-primary" onclick="calcular()">🔄 Calcular</button>
                         </div>
                     </div>
 
-                    <table class="data-table" style="margin-top:16px;">
-                        <thead>
-                        <tr>
-                            <th>Participante</th>
-                            <th>CPF</th>
-                            <th>Pontos</th>
-                            <th>Medalha</th>
-                            <th>Certificado</th>
-                        </tr>
-                        </thead>
-                        <tbody id="tbody-medalhas"></tbody>
-                    </table>
+                    <div id="resultado-sumario" class="hidden">
+                        <div class="sumario-stats">
+                            <div class="sumario-stat">
+                                <span class="sumario-stat-val" id="stat-total">0</span>
+                                <span class="sumario-stat-label">Participantes avaliados</span>
+                            </div>
+                            <div class="sumario-stat">
+                                <span class="sumario-stat-val" id="stat-com-medalha">0</span>
+                                <span class="sumario-stat-label">Com medalha</span>
+                            </div>
+                            <div class="sumario-stat">
+                                <span class="sumario-stat-val" id="stat-sem-medalha">0</span>
+                                <span class="sumario-stat-label">Sem medalha</span>
+                            </div>
+                        </div>
 
-                    <div class="form-actions" style="margin-top:20px;">
-                        <button class="btn btn-ghost" onclick="exportarCSVMedalhas()">⬇️ Exportar lista CSV</button>
-                        <button class="btn btn-primary" onclick="gerarTodos()">🏅 Gerar Todos os Certificados</button>
-                    </div>
-                    <div id="toast-gerado" class="toast toast-success hidden" style="margin-top:16px;">
-                        ✅ Certificados enviados por e-mail aos participantes!
+                        <table class="data-table" style="margin-top:16px;">
+                            <thead>
+                            <tr>
+                                <th>Participante</th>
+                                <th>CPF</th>
+                                <th>Pontos</th>
+                                <th>Medalha</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tbody-medalhas"></tbody>
+                        </table>
+
+                        <div class="form-actions" style="margin-top:20px;">
+                            <button class="btn btn-ghost" onclick="exportarCSV()">⬇️ Exportar CSV</button>
+                            <button class="btn btn-primary" onclick="gerarTodos()">🏅 Gerar Todos os Certificados</button>
+                        </div>
+                        <div id="toast-gerado" class="toast toast-success hidden" style="margin-top:16px;">
+                            ✅ Certificados enviados por e-mail aos participantes!
+                        </div>
                     </div>
                 </div>
             </div>
@@ -219,178 +151,338 @@
     </div>
 </main>
 
+<!-- Modal Nova/Editar Medalha -->
+<div id="modal-medalha" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width:440px;width:100%;">
+        <h3 id="modal-titulo">Nova Medalha</h3>
+
+        <div class="form-group" style="margin-top:16px;">
+            <label for="m-nome">Nome <span class="required">*</span></label>
+            <input type="text" id="m-nome" placeholder="Ex.: Bronze, Prata, Ouro, Platina..."/>
+            <span class="field-error" id="err-m-nome"></span>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="m-min">Pontos mínimos <span class="required">*</span></label>
+                <input type="number" id="m-min" min="0" step="0.5" placeholder="Ex.: 1.0"/>
+                <span class="field-error" id="err-m-min"></span>
+            </div>
+            <div class="form-group">
+                <label for="m-max">Pontos máximos <span class="required">*</span></label>
+                <input type="number" id="m-max" min="0" step="0.5" placeholder="Ex.: 4.0"/>
+                <span class="field-error" id="err-m-max"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="m-imagem">Imagem da Medalha</label>
+            <input type="file" id="m-imagem" accept="image/*" onchange="previewImagem(this)"/>
+            <div id="preview-imagem" style="margin-top:8px;display:none;">
+                <img id="img-preview" src="" style="width:80px;height:80px;object-fit:contain;border-radius:8px;border:1px solid var(--gray-200);"/>
+            </div>
+            <input type="hidden" id="m-imagemUrl"/>
+        </div>
+
+        <div id="err-modal" class="error-msg hidden" style="margin-top:8px;"></div>
+
+        <div class="modal-actions" style="margin-top:20px;">
+            <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+            <button class="btn btn-primary" onclick="salvarMedalha()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Exclusão -->
+<div id="modal-excluir" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h3>Excluir Medalha</h3>
+        <p>Tem certeza que deseja excluir a medalha <strong id="modal-excluir-nome"></strong>?</p>
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="fecharModalExcluir()">Cancelar</button>
+            <button class="btn btn-danger" onclick="confirmarExclusao()">Excluir</button>
+        </div>
+    </div>
+</div>
+
 <script>
     checkAuth();
 
-    let resultadoAtual = [];
+    let medalhaEditandoId = null;
+    let medalhaExcluindoId = null;
+    let geracaoAtiva = false;
 
     // ── Init ─────────────────────────────────────────────────────
-    carregarRegras();
+    carregarMedalhas();
+    carregarStatusGeracao();
 
-    function carregarRegras() {
-      authFetch(`${BASE_URL}/api/medalhas/regras`)
-        .then(res => res.json())
-        .then(regras => {
-          document.getElementById('bronze-min').value = regras.bronzeMin;
-          document.getElementById('bronze-max').value = regras.bronzeMax;
-          document.getElementById('prata-min').value = regras.prataMin;
-          document.getElementById('prata-max').value = regras.prataMax;
-          document.getElementById('ouro-min').value = regras.ouroMin;
-          document.getElementById('ouro-max').value = regras.ouroMax;
-          atualizarPreview();
+    // ── Medalhas ─────────────────────────────────────────────────
+    function carregarMedalhas() {
+        authFetch(`${BASE_URL}/api/medalhas`)
+            .then(res => res.json())
+            .then(data => {
+                const lista = document.getElementById('lista-medalhas');
+                const empty = document.getElementById('empty-medalhas');
+
+                if (data.length === 0) {
+                    empty.style.display = 'block';
+                    return;
+                }
+                empty.style.display = 'none';
+                lista.innerHTML = '';
+
+                data.forEach(m => {
+                    const card = document.createElement('div');
+                    card.style.cssText = 'border:1px solid var(--gray-200);border-radius:12px;padding:20px;text-align:center;background:white;';
+                    card.innerHTML = `
+                        ${m.imagemUrl
+                            ? `<img src="${m.imagemUrl}" style="width:64px;height:64px;object-fit:contain;margin-bottom:8px;"/>`
+                            : `<div style="font-size:2.5rem;margin-bottom:8px;">🏅</div>`}
+                        <div style="font-weight:600;font-size:1rem;margin-bottom:4px;">${m.nome}</div>
+                        <div style="font-size:0.8rem;color:var(--gray-500);margin-bottom:12px;">${m.pontosMin} – ${m.pontosMax} pontos</div>
+                        <div style="display:flex;gap:6px;justify-content:center;">
+                            <button class="btn btn-sm btn-ghost" onclick="editarMedalha(${m.id})">✏️ Editar</button>
+                            <button class="btn btn-sm btn-danger-ghost" onclick="abrirModalExcluir(${m.id}, '${m.nome}')">🗑️</button>
+                        </div>`;
+                    lista.appendChild(card);
+                });
+            });
+    }
+
+    // ── Modal Medalha ─────────────────────────────────────────────
+    function abrirModalNova() {
+        medalhaEditandoId = null;
+        document.getElementById('modal-titulo').textContent = 'Nova Medalha';
+        document.getElementById('m-nome').value = '';
+        document.getElementById('m-min').value = '';
+        document.getElementById('m-max').value = '';
+        document.getElementById('m-imagemUrl').value = '';
+        document.getElementById('preview-imagem').style.display = 'none';
+        document.getElementById('m-imagem').value = '';
+        document.getElementById('err-modal').classList.add('hidden');
+        ['m-nome','m-min','m-max'].forEach(id => {
+            document.getElementById('err-' + id).textContent = '';
+            document.getElementById(id).classList.remove('input-error');
         });
+        document.getElementById('modal-medalha').classList.remove('hidden');
     }
 
-    // ── Regras ───────────────────────────────────────────────────
-    function atualizarPreview() {
-      const bMin = val('bronze-min'), bMax = val('bronze-max');
-      const pMin = val('prata-min'),  pMax = val('prata-max');
-      const oMin = val('ouro-min'),   oMax = val('ouro-max');
-      document.getElementById('range-bronze').textContent = `${bMin} – ${bMax} pts`;
-      document.getElementById('range-prata').textContent  = `${pMin} – ${pMax} pts`;
-      document.getElementById('range-ouro').textContent   = `${oMin} – ${oMax} pts`;
-      const overlap = bMax >= pMin || pMax >= oMin || bMin >= bMax || pMin >= pMax || oMin >= oMax;
-      document.getElementById('aviso-sobreposicao').classList.toggle('hidden', !overlap);
+    function editarMedalha(id) {
+        authFetch(`${BASE_URL}/api/medalhas/${id}`)
+            .then(res => res.json())
+            .then(m => {
+                medalhaEditandoId = m.id;
+                document.getElementById('modal-titulo').textContent = 'Editar Medalha';
+                document.getElementById('m-nome').value = m.nome;
+                document.getElementById('m-min').value = m.pontosMin;
+                document.getElementById('m-max').value = m.pontosMax;
+                document.getElementById('m-imagemUrl').value = m.imagemUrl || '';
+                if (m.imagemUrl) {
+                    document.getElementById('img-preview').src = m.imagemUrl;
+                    document.getElementById('preview-imagem').style.display = 'block';
+                } else {
+                    document.getElementById('preview-imagem').style.display = 'none';
+                }
+                document.getElementById('err-modal').classList.add('hidden');
+                document.getElementById('modal-medalha').classList.remove('hidden');
+            });
     }
 
-    function val(id) { return parseFloat(document.getElementById(id).value) || 0; }
+    function fecharModal() {
+        document.getElementById('modal-medalha').classList.add('hidden');
+    }
 
-    function restaurarPadrao() {
-      authFetch(`${BASE_URL}/api/medalhas/regras/restaurar`, { method: 'POST' })
-        .then(res => res.json())
-        .then(regras => {
-          document.getElementById('bronze-min').value = regras.bronzeMin;
-          document.getElementById('bronze-max').value = regras.bronzeMax;
-          document.getElementById('prata-min').value = regras.prataMin;
-          document.getElementById('prata-max').value = regras.prataMax;
-          document.getElementById('ouro-min').value = regras.ouroMin;
-          document.getElementById('ouro-max').value = regras.ouroMax;
-          atualizarPreview();
+    function previewImagem(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('img-preview').src = e.target.result;
+                document.getElementById('preview-imagem').style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    async function salvarMedalha() {
+        const nome = document.getElementById('m-nome').value.trim();
+        const min = parseFloat(document.getElementById('m-min').value);
+        const max = parseFloat(document.getElementById('m-max').value);
+        let valido = true;
+
+        ['m-nome','m-min','m-max'].forEach(id => {
+            document.getElementById('err-' + id).textContent = '';
+            document.getElementById(id).classList.remove('input-error');
         });
-    }
 
-    function salvarRegras(e) {
-      e.preventDefault();
-      const bMin = val('bronze-min'), bMax = val('bronze-max');
-      const pMin = val('prata-min'),  pMax = val('prata-max');
-      const oMin = val('ouro-min'),   oMax = val('ouro-max');
-      let ok = true;
+        if (!nome) { erroField('m-nome', 'Informe o nome.'); valido = false; }
+        if (isNaN(min) || min < 0) { erroField('m-min', 'Valor inválido.'); valido = false; }
+        if (isNaN(max) || max <= min) { erroField('m-max', 'Deve ser maior que o mínimo.'); valido = false; }
+        if (!valido) return;
 
-      function err(id, msg) {
-        document.getElementById('err-'+id).textContent = msg;
-        document.getElementById(id).classList.add('input-error');
-        ok = false;
-      }
+        // Upload de imagem se houver arquivo selecionado
+        let imagemUrl = document.getElementById('m-imagemUrl').value;
+        const fileInput = document.getElementById('m-imagem');
+        if (fileInput.files && fileInput.files[0]) {
+            const formData = new FormData();
+            formData.append('arquivo', fileInput.files[0]);
+            try {
+                const res = await authFetchForm(`${BASE_URL}/api/medalhas/upload`, formData);
+                imagemUrl = await res.text();
+            } catch {
+                document.getElementById('err-modal').textContent = 'Erro ao fazer upload da imagem.';
+                document.getElementById('err-modal').classList.remove('hidden');
+                return;
+            }
+        }
 
-      ['bronze-min','bronze-max','prata-min','prata-max','ouro-min','ouro-max'].forEach(id => {
-        document.getElementById('err-'+id).textContent = '';
-        document.getElementById(id).classList.remove('input-error');
-      });
+        const body = { nome, pontosMin: min, pontosMax: max, imagemUrl: imagemUrl || null };
+        const url = medalhaEditandoId ? `${BASE_URL}/api/medalhas/${medalhaEditandoId}` : `${BASE_URL}/api/medalhas`;
+        const method = medalhaEditandoId ? 'PUT' : 'POST';
 
-      if (bMin < 0)     err('bronze-min', 'Valor inválido.');
-      if (bMax <= bMin) err('bronze-max', 'Deve ser maior que o mínimo Bronze.');
-      if (pMin <= bMax) err('prata-min',  'Deve ser maior que o máximo Bronze.');
-      if (pMax <= pMin) err('prata-max',  'Deve ser maior que o mínimo Prata.');
-      if (oMin <= pMax) err('ouro-min',   'Deve ser maior que o máximo Prata.');
-      if (oMax <= oMin) err('ouro-max',   'Deve ser maior que o mínimo Ouro.');
-
-      if (!ok) return;
-
-        authFetch(`${BASE_URL}/api/medalhas/regras`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bronzeMin: bMin, bronzeMax: bMax,
-          prataMin: pMin,  prataMax: pMax,
-          ouroMin: oMin,   ouroMax: oMax
+        authFetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
         })
-      })
-        .then(res => res.json())
-        .then(() => {
-          const t = document.getElementById('toast-regras');
-          t.classList.remove('hidden');
-          setTimeout(() => t.classList.add('hidden'), 3000);
-        });
+        .then(async res => {
+            if (res.status === 409) {
+                const msg = await res.text();
+                document.getElementById('err-modal').textContent = msg;
+                document.getElementById('err-modal').classList.remove('hidden');
+                return;
+            }
+            if (!res.ok) {
+                document.getElementById('err-modal').textContent = 'Erro ao salvar medalha.';
+                document.getElementById('err-modal').classList.remove('hidden');
+                return;
+            }
+
+            fecharModal();
+            carregarMedalhas();
+        })
     }
 
-    // ── Gerar Medalhas ───────────────────────────────────────────
+    function erroField(id, msg) {
+        document.getElementById('err-' + id).textContent = msg;
+        document.getElementById(id).classList.add('input-error');
+    }
+
+    // ── Excluir ──────────────────────────────────────────────────
+    function abrirModalExcluir(id, nome) {
+        medalhaExcluindoId = id;
+        document.getElementById('modal-excluir-nome').textContent = nome;
+        document.getElementById('modal-excluir').classList.remove('hidden');
+    }
+
+    function fecharModalExcluir() {
+        document.getElementById('modal-excluir').classList.add('hidden');
+    }
+
+    function confirmarExclusao() {
+        authFetch(`${BASE_URL}/api/medalhas/${medalhaExcluindoId}`, { method: 'DELETE' })
+            .then(res => {
+                if (res.ok) { fecharModalExcluir(); carregarMedalhas(); }
+            });
+    }
+
+    // ── Toggle Geração ───────────────────────────────────────────
+    function carregarStatusGeracao() {
+        authFetch(`${BASE_URL}/api/medalhas/configuracao`)
+            .then(res => res.json())
+            .then(ativo => atualizarToggle(ativo));
+    }
+
+    function toggleGeracao() {
+        const endpoint = geracaoAtiva ? '/api/medalhas/configuracao/desativar' : '/api/medalhas/configuracao/ativar';
+        authFetch(`${BASE_URL}${endpoint}`, { method: 'POST' })
+            .then(() => atualizarToggle(!geracaoAtiva));
+    }
+
+    function atualizarToggle(ativo) {
+        geracaoAtiva = ativo;
+        document.getElementById('label-status').textContent = ativo ? 'Ativo' : 'Inativo';
+        document.getElementById('label-status').style.color = ativo ? 'var(--success)' : 'var(--gray-500)';
+        document.getElementById('btn-toggle').textContent = ativo ? 'Desativar' : 'Ativar';
+        document.getElementById('btn-toggle').className = ativo ? 'btn btn-danger-ghost' : 'btn btn-primary';
+        document.getElementById('gerar-bloqueado').classList.toggle('hidden', ativo);
+        document.getElementById('gerar-ativo').classList.toggle('hidden', !ativo);
+    }
+
+    // ── Calcular ─────────────────────────────────────────────────
     function calcular() {
-      const [ano, semestre] = document.getElementById('semestre').value.split('-');
+        const [ano, semestre] = document.getElementById('semestre').value.split('-');
+        authFetch(`${BASE_URL}/api/medalhas/calcular?ano=${ano}&semestre=${semestre}`)
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('tbody-medalhas');
+                tbody.innerHTML = '';
+                let comMedalha = 0;
 
-      authFetch(`${BASE_URL}/api/medalhas/calcular?ano=${ano}&semestre=${semestre}`)
-        .then(res => res.json())
-        .then(data => {
-          resultadoAtual = data;
-          const tbody = document.getElementById('tbody-medalhas');
-          tbody.innerHTML = '';
-          let bronze = 0, prata = 0, ouro = 0;
+                data.forEach(p => {
+                    if (p.medalha) comMedalha++;
+                    const medalhaCol = p.medalha
+                        ? `<span class="badge badge-orange">🏅 ${p.medalha}</span>`
+                        : `<span style="color:var(--gray-400);font-size:0.8rem;">— Sem medalha</span>`;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${p.participante}</td>
+                        <td>${p.cpf}</td>
+                        <td><strong>${p.pontos.toFixed(1)}</strong></td>
+                        <td>${medalhaCol}</td>`;
+                    tbody.appendChild(tr);
+                });
 
-          data.forEach(p => {
-            if (p.medalha === 'BRONZE') bronze++;
-            else if (p.medalha === 'PRATA') prata++;
-            else if (p.medalha === 'OURO') ouro++;
-
-            const medalhaIcones = { 'OURO': '🥇 Ouro', 'PRATA': '🥈 Prata', 'BRONZE': '🥉 Bronze' };
-            const medalhaClasses = { 'OURO': 'badge-orange', 'PRATA': 'badge-gray', 'BRONZE': 'badge-gray' };
-            const medalhaCol = p.medalha
-              ? `<span class="badge ${medalhaClasses[p.medalha]}">${medalhaIcones[p.medalha]}</span>`
-              : `<span style="color:var(--gray-400);font-size:0.8rem;">— Sem medalha</span>`;
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${p.participante}</td>
-              <td>${p.cpf}</td>
-              <td><strong>${p.pontos.toFixed(1)}</strong></td>
-              <td>${medalhaCol}</td>
-              <td><span style="color:var(--gray-400);font-size:0.8rem;">—</span></td>`;
-            tbody.appendChild(tr);
-          });
-
-          document.getElementById('stat-total').textContent = data.length;
-          document.getElementById('stat-bronze').textContent = `🥉 ${bronze}`;
-          document.getElementById('stat-prata').textContent = `🥈 ${prata}`;
-          document.getElementById('stat-ouro').textContent = `🥇 ${ouro}`;
-          document.getElementById('resultado-sumario').classList.remove('hidden');
-          document.getElementById('toast-gerado').classList.add('hidden');
-        });
+                document.getElementById('stat-total').textContent = data.length;
+                document.getElementById('stat-com-medalha').textContent = comMedalha;
+                document.getElementById('stat-sem-medalha').textContent = data.length - comMedalha;
+                document.getElementById('resultado-sumario').classList.remove('hidden');
+                document.getElementById('toast-gerado').classList.add('hidden');
+            });
     }
 
     function gerarTodos() {
         const [ano, semestre] = document.getElementById('semestre').value.split('-');
-
-        authFetch(`${BASE_URL}/api/medalhas/enviar-certificados?ano=${ano}&semestre=${semestre}`, {
-            method: 'POST'
-        })
-        .then(res => {
-          if (res.ok) {
-            const t = document.getElementById('toast-gerado');
-            t.classList.remove('hidden');
-            setTimeout(() => t.classList.add('hidden'), 5000);
-          }
-        })
-        .catch(() => alert('Erro ao enviar certificados.'));
+        authFetch(`${BASE_URL}/api/medalhas/enviar-certificados?ano=${ano}&semestre=${semestre}`, { method: 'POST' })
+            .then(res => {
+                if (res.ok) {
+                    const t = document.getElementById('toast-gerado');
+                    t.classList.remove('hidden');
+                    setTimeout(() => t.classList.add('hidden'), 5000);
+                }
+            })
+            .catch(() => alert('Erro ao enviar certificados.'));
     }
 
-    function exportarCSVMedalhas() {
-      const [ano, semestre] = document.getElementById('semestre').value.split('-');
-      authFetch(`${BASE_URL}/api/medalhas/exportar?ano=${ano}&semestre=${semestre}`)
-        .then(res => res.blob())
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `medalhas_${semestre}_${ano}.csv`;
-          a.click();
-          window.URL.revokeObjectURL(url);
+    function exportarCSV() {
+        const [ano, semestre] = document.getElementById('semestre').value.split('-');
+        authFetch(`${BASE_URL}/api/medalhas/exportar?ano=${ano}&semestre=${semestre}`)
+            .then(res => res.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `medalhas_${semestre}_${ano}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+    }
+
+    // ── authFetchForm (multipart) ─────────────────────────────────
+    function authFetchForm(url, formData) {
+        const token = sessionStorage.getItem('token');
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token },
+            body: formData
         });
     }
 
     // ── Tabs ─────────────────────────────────────────────────────
     function mudaTab(ev, tab) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
-      ev.target.classList.add('tab-active');
-      document.getElementById('tab-regras').classList.toggle('hidden', tab !== 'regras');
-      document.getElementById('tab-gerar').classList.toggle('hidden', tab !== 'gerar');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+        ev.target.classList.add('tab-active');
+        document.getElementById('tab-medalhas').classList.toggle('hidden', tab !== 'medalhas');
+        document.getElementById('tab-gerar').classList.toggle('hidden', tab !== 'gerar');
     }
 </script>
 </body>

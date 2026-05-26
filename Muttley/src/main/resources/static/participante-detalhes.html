@@ -119,25 +119,22 @@
       const medalBadge = document.getElementById('medal-badge');
       const breakdown = document.getElementById('points-breakdown');
 
-      const icones = { 'OURO': '🥇', 'PRATA': '🥈', 'BRONZE': '🥉' };
-      const nomes = { 'OURO': 'Ouro', 'PRATA': 'Prata', 'BRONZE': 'Bronze' };
-
       if (medalha) {
-        medalBadge.innerHTML = `<span class="medal-icon">${icones[medalha]}</span><span class="medal-name">Medalha ${nomes[medalha]}</span>`;
+        medalBadge.innerHTML = `<span class="medal-icon">🏅</span><span class="medal-name">Medalha ${medalha}</span>`;
         medalBadge.className = 'medal-badge medal-earned';
       } else {
         medalBadge.innerHTML = `<span class="medal-icon">—</span><span class="medal-name">Sem medalha ainda</span>`;
         medalBadge.className = 'medal-badge';
       }
 
-      authFetch(`${BASE_URL}/api/medalhas/regras`)
+      authFetch(`${BASE_URL}/api/medalhas`)
         .then(res => res.json())
-        .then(regras => {
-          breakdown.innerHTML = `
-            <span class="breakdown-item ${medalha === 'BRONZE' ? 'active-range' : ''}">Bronze: ${regras.bronzeMin}–${regras.bronzeMax} pts${medalha === 'BRONZE' ? ' ✓' : ''}</span>
-            <span class="breakdown-item ${medalha === 'PRATA' ? 'active-range' : ''}">Prata: ${regras.prataMin}–${regras.prataMax} pts${medalha === 'PRATA' ? ' ✓' : ''}</span>
-            <span class="breakdown-item ${medalha === 'OURO' ? 'active-range' : ''}">Ouro: ${regras.ouroMin}–${regras.ouroMax} pts${medalha === 'OURO' ? ' ✓' : ''}</span>
-          `;
+        .then(medalhas => {
+            breakdown.innerHTML = medalhas.map(m =>
+                `<span class="breakdown-item ${medalha === m.nome ? 'active-range' : ''}">
+                    ${m.nome}: ${m.pontosMin}–${m.pontosMax} pts${medalha === m.nome ? ' ✓' : ''}
+                </span>`
+            ).join('');
         });
     }
 

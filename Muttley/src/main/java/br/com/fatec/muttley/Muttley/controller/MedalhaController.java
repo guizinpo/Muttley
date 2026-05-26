@@ -48,6 +48,21 @@ public class MedalhaController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadImagem(
+            @RequestParam("arquivo") org.springframework.web.multipart.MultipartFile arquivo) {
+        try {
+            String nomeArquivo = java.util.UUID.randomUUID() + "_" + arquivo.getOriginalFilename();
+            java.nio.file.Path destino = java.nio.file.Paths.get("uploads/medalhas/" + nomeArquivo);
+            java.nio.file.Files.createDirectories(destino.getParent());
+            arquivo.transferTo(destino.toFile());
+            String url = "/uploads/medalhas/" + nomeArquivo;
+            return ResponseEntity.ok(url);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao fazer upload");
+        }
+    }
+
     @GetMapping("/calcular")
     public ResponseEntity<List<MedalhaResultadoDTO>> calcular(
             @RequestParam int ano,
