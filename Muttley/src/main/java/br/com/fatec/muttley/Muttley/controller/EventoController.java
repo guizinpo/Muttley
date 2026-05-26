@@ -88,4 +88,9 @@ public class EventoController {
                 .header("Content-Type", "image/png")
                 .body(imagem);
     }
+
+    @PutMapping("/{id}/encerrar")
+    public ResponseEntity<Evento> encerrar(@PathVariable Long id) {
+        return ResponseEntity.ok(service.encerrar(id));
+    }
 }

@@ -2,6 +2,7 @@ package br.com.fatec.muttley.Muttley.service;
 
 import br.com.fatec.muttley.Muttley.dto.EventoResumoDTO;
 import br.com.fatec.muttley.Muttley.entity.Evento;
+import br.com.fatec.muttley.Muttley.enums.StatusEvento;
 import br.com.fatec.muttley.Muttley.repository.EventoRepository;
 import br.com.fatec.muttley.Muttley.repository.InscricaoRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +48,14 @@ public class EventoService {
     }
 
     public Evento buscarPorQrCodeInscricao(String token) {
-        return repository.findByQrCodeInscricao(token)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "QR Code inválido ou evento encerrado"));
+        Evento evento = repository.findByQrCodeInscricao(token)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "QR Code inválido ou evento encerrado"));
+        if (evento.getStatus() == StatusEvento.ENCERRADO) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "QR Code inválido ou evento encerrado");
+        }
+        return evento;
     }
 
     public Evento buscarPorQrCodeParticipacao(String token) {
@@ -82,7 +89,20 @@ public class EventoService {
 
     public void deletar(Long id) {
         buscarPorId(id);
+        if (inscricaoRepository.countByEventoId(id) > 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Não é possível excluir um evento com inscritos");
+        }
         repository.deleteById(id);
+    }
+
+    public Evento encerrar(Long id) {
+        Evento evento = buscarPorId(id);
+        if (evento.getStatus() == StatusEvento.ENCERRADO) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Evento já está encerrado");
+        }
+        evento.setStatus(StatusEvento.ENCERRADO);
+        return repository.save(evento);
     }
 
     private void validarHorarios(Evento evento) {

@@ -16,6 +16,7 @@ public class EventoResumoDTO {
     private Double pontos;
     private Long inscritos;
     private String modalidade;
+    private String status;
 
     public static EventoResumoDTO de(Evento evento, Long inscritos) {
         EventoResumoDTO dto = new EventoResumoDTO();
@@ -29,6 +30,7 @@ public class EventoResumoDTO {
         dto.setPontos(evento.getPontos());
         dto.setInscritos(inscritos);
         dto.setModalidade(evento.getModalidade().name());
+        dto.setStatus(evento.getStatus().name());
         return dto;
     }
 }

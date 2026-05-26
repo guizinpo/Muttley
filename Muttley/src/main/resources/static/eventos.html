@@ -1,71 +1,71 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mutley — Eventos</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="auth.js"></script>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mutley — Eventos</title>
+    <link rel="stylesheet" href="style.css"/>
+    <script src="auth.js"></script>
 </head>
 <body class="app-page">
-  <aside class="sidebar">
+<aside class="sidebar">
     <div class="sidebar-logo"><span class="logo-icon">🎓</span><span>Mutley</span></div>
     <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
-      <a href="participantes.html" class="nav-item">👥 Participantes</a>
-      <a href="palestrantes.html" class="nav-item">🎤 Palestrantes</a>
-      <a href="eventos.html" class="nav-item active">📅 Eventos</a>
-      <a href="medalhas.html" class="nav-item">🏅 Medalhas</a>
+        <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+        <a href="participantes.html" class="nav-item">👥 Participantes</a>
+        <a href="palestrantes.html" class="nav-item">🎤 Palestrantes</a>
+        <a href="eventos.html" class="nav-item active">📅 Eventos</a>
+        <a href="medalhas.html" class="nav-item">🏅 Medalhas</a>
     </nav>
     <a href="#" onclick="logout()" class="nav-item logout">⬅ Sair</a>
-  </aside>
+</aside>
 
-  <main class="main-content">
+<main class="main-content">
     <header class="topbar">
-      <h2>Eventos</h2>
-      <a href="evento-form.html" class="btn btn-primary">+ Novo Evento</a>
-      <div class="topbar-user">👤 Administrador</div>
+        <h2>Eventos</h2>
+        <a href="evento-form.html" class="btn btn-primary">+ Novo Evento</a>
+        <div class="topbar-user">👤 Administrador</div>
     </header>
 
     <div class="page-body">
-      <div class="section-box">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>Descrição</th>
-              <th>Área</th>
-              <th>Palestrante</th>
-              <th>Início</th>
-              <th>Pts</th>
-              <th>Inscritos</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-eventos"></tbody>
-        </table>
-        <div class="pagination">
-          <button class="btn btn-ghost" id="btn-anterior" onclick="mudarPagina(-1)">‹ Anterior</button>
-          <span class="page-info" id="info-pagina">Página 1 de 1</span>
-          <button class="btn btn-ghost" id="btn-proxima" onclick="mudarPagina(1)">Próxima ›</button>
+        <div class="section-box">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Área</th>
+                    <th>Palestrante</th>
+                    <th>Início</th>
+                    <th>Pts</th>
+                    <th>Inscritos</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody id="tbody-eventos"></tbody>
+            </table>
+            <div class="pagination">
+                <button class="btn btn-ghost" id="btn-anterior" onclick="mudarPagina(-1)">‹ Anterior</button>
+                <span class="page-info" id="info-pagina">Página 1 de 1</span>
+                <button class="btn btn-ghost" id="btn-proxima" onclick="mudarPagina(1)">Próxima ›</button>
+            </div>
         </div>
-      </div>
     </div>
-  </main>
+</main>
 
-  <div id="modal-excluir" class="modal-overlay hidden">
+<div id="modal-excluir" class="modal-overlay hidden">
     <div class="modal-card">
-      <h3>Excluir Evento</h3>
-      <p>Tem certeza que deseja excluir o evento <strong id="modal-nome"></strong>?</p>
-      <p class="warning-text">⚠️ Todas as inscrições vinculadas a este evento também serão removidas.</p>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
-        <button class="btn btn-danger" onclick="confirmarExclusao()">Excluir</button>
-      </div>
+        <h3>Excluir Evento</h3>
+        <p>Tem certeza que deseja excluir o evento <strong id="modal-nome"></strong>?</p>
+        <p class="warning-text">⚠️ Todas as inscrições vinculadas a este evento também serão removidas.</p>
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+            <button class="btn btn-danger" onclick="confirmarExclusao()">Excluir</button>
+        </div>
     </div>
-  </div>
+</div>
 
-  <script>
+<script>
     checkAuth();
 
     let paginaAtual = 0;
@@ -101,28 +101,50 @@
           data.content.forEach(ev => {
             const dataFormatada = new Date(ev.dataEvento).toLocaleDateString('pt-BR');
             const horario = ev.horaInicio.substring(0, 5);
-            ev.tipo
             const tr = document.createElement('tr');
+            const btnEncerrar = ev.status === 'ENCERRADO'
+                ? `<span class="badge badge-gray">Encerrado</span>`
+                : `<button class="btn btn-sm btn-ghost" onclick="encerrarEvento(${ev.id}, '${ev.descricao}')">🔒 Encerrar</button>`;
+            const btnDeletar = ev.inscritos > 0
+                ? ''
+                : `<button class="btn btn-sm btn-danger-ghost" onclick="abrirModal(${ev.id}, '${ev.descricao}')">🗑️</button>`;
+
             tr.innerHTML = `
-              <td><span class="badge badge-blue">${ev.tipo}</span></td>
-              <td>${ev.descricao}</td>
-              <td><span class="badge badge-green">${ev.area}</span></span></td>
-              <td>${ev.palestrante}</td>
-              <td>${dataFormatada} ${horario}</td>
-              <td>${ev.pontos.toFixed(1)}</td>
-              <td><span class="badge badge-gray">${ev.inscritos}</span></td>
-              <td style="white-space:nowrap;">
-                <a href="evento-detalhes.html?id=${ev.id}" class="btn btn-sm btn-ghost">👁 Ver</a>
-                <a href="evento-form.html?id=${ev.id}" class="btn btn-sm btn-ghost">✏️ Editar</a>
-                <button class="btn btn-sm btn-danger-ghost" onclick="abrirModal(${ev.id}, '${ev.descricao}')">🗑️</button>
-              </td>`;
-            tbody.appendChild(tr);
+                <td><span class="badge badge-blue">${ev.tipo}</span></td>
+                <td>${ev.descricao}</td>
+                <td><span class="badge badge-green">${ev.area}</span></td>
+                <td>${ev.palestrante}</td>
+                <td>${dataFormatada} ${horario}</td>
+                <td>${ev.pontos.toFixed(1)}</td>
+                <td><span class="badge badge-gray">${ev.inscritos}</span></td>
+                <td style="white-space:nowrap;">
+                    <a href="evento-detalhes.html?id=${ev.id}" class="btn btn-sm btn-ghost">👁 Ver</a>
+                    <a href="evento-form.html?id=${ev.id}" class="btn btn-sm btn-ghost">✏️ Editar</a>
+                    ${btnEncerrar}
+                    ${btnDeletar}
+                </td>`;
+                tbody.appendChild(tr);
           });
 
           document.getElementById('info-pagina').textContent = `Página ${paginaAtual + 1} de ${totalPaginas}`;
           document.getElementById('btn-anterior').disabled = paginaAtual === 0;
           document.getElementById('btn-proxima').disabled = paginaAtual >= totalPaginas - 1;
         });
+    }
+
+    function encerrarEvento(id, nome) {
+        if (!confirm(`Deseja encerrar o evento "${nome}"? O QR Code de inscrição será desativado.`)) return;
+
+        authFetch(`${BASE_URL}/api/eventos/${id}/encerrar`, { method: 'PUT' })
+            .then(res => {
+                if (res.ok) {
+                    alert('Evento encerrado com sucesso!');
+                    carregarEventos();
+                } else {
+                    alert('Erro ao encerrar evento.');
+                }
+            })
+        .catch(() => alert('Erro ao encerrar evento.'));
     }
 
     function mudarPagina(direcao) {
@@ -151,6 +173,6 @@
     }
 
     carregarEventos();
-  </script>
+</script>
 </body>
 </html>
