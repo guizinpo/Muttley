@@ -1,12 +1,14 @@
 package br.com.fatec.muttley.Muttley.service;
 
 import br.com.fatec.muttley.Muttley.entity.Inscricao;
+import br.com.fatec.muttley.Muttley.entity.Medalha;
 import br.com.fatec.muttley.Muttley.entity.Participante;
 import br.com.fatec.muttley.Muttley.enums.StatusInscricao;
 import br.com.fatec.muttley.Muttley.repository.InscricaoRepository;
+import br.com.fatec.muttley.Muttley.repository.MedalhaRepository;
+import br.com.fatec.muttley.Muttley.dto.MedalhaResultadoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import br.com.fatec.muttley.Muttley.dto.MedalhaResultadoDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,8 +20,46 @@ import java.util.Map;
 public class MedalhaService {
 
     private final InscricaoRepository inscricaoRepository;
-    private final RegrasMedalhaService regrasMedalhaService;
+    private final MedalhaRepository medalhaRepository;
     private final EmailService emailService;
+
+    public List<Medalha> listar() {
+        return medalhaRepository.findAllByOrderByPontosMinAsc();
+    }
+
+    public Medalha buscarPorId(Long id) {
+        return medalhaRepository.findById(id)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Medalha não encontrada"));
+    }
+
+    public Medalha salvar(Medalha medalha) {
+        return medalhaRepository.save(medalha);
+    }
+
+    public Medalha atualizar(Long id, Medalha dados) {
+        Medalha existente = buscarPorId(id);
+        existente.setNome(dados.getNome());
+        existente.setImagemUrl(dados.getImagemUrl());
+        existente.setPontosMin(dados.getPontosMin());
+        existente.setPontosMax(dados.getPontosMax());
+        return medalhaRepository.save(existente);
+    }
+
+    public void deletar(Long id) {
+        buscarPorId(id);
+        medalhaRepository.deleteById(id);
+    }
+
+    public String calcularMedalha(Double pontos) {
+        List<Medalha> medalhas = medalhaRepository.findAllByOrderByPontosMinAsc();
+        for (Medalha medalha : medalhas) {
+            if (pontos >= medalha.getPontosMin() && pontos <= medalha.getPontosMax()) {
+                return medalha.getNome();
+            }
+        }
+        return null;
+    }
 
     public List<MedalhaResultadoDTO> calcularMedalhasSemestre(int ano, int semestre) {
         List<Inscricao> inscricoes = inscricaoRepository
@@ -38,7 +78,7 @@ public class MedalhaService {
         for (Map.Entry<Participante, Double> entry : pontosPorParticipante.entrySet()) {
             Participante participante = entry.getKey();
             Double pontos = entry.getValue();
-            String medalha = regrasMedalhaService.calcularMedalha(pontos);
+            String medalha = calcularMedalha(pontos);
             resultado.add(new MedalhaResultadoDTO(
                     participante.getNome(),
                     participante.getCpf(),
@@ -47,7 +87,6 @@ public class MedalhaService {
         }
 
         resultado.sort((a, b) -> Double.compare(b.getPontos(), a.getPontos()));
-
         return resultado;
     }
 

@@ -1,16 +1,16 @@
 package br.com.fatec.muttley.Muttley.controller;
 
-import br.com.fatec.muttley.Muttley.entity.RegrasMedalha;
+import br.com.fatec.muttley.Muttley.entity.Medalha;
+import br.com.fatec.muttley.Muttley.service.ConfiguracaoSistemaService;
 import br.com.fatec.muttley.Muttley.service.MedalhaService;
-import br.com.fatec.muttley.Muttley.service.RegrasMedalhaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import br.com.fatec.muttley.Muttley.dto.MedalhaResultadoDTO;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/medalhas")
@@ -18,28 +18,43 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class MedalhaController {
 
-    private final RegrasMedalhaService regrasMedalhaService;
     private final MedalhaService medalhaService;
+    private final ConfiguracaoSistemaService configuracaoService;
 
-    @GetMapping("/regras")
-    public ResponseEntity<RegrasMedalha> buscarRegras() {
-        return ResponseEntity.ok(regrasMedalhaService.buscar());
+    @GetMapping
+    public ResponseEntity<List<Medalha>> listar() {
+        return ResponseEntity.ok(medalhaService.listar());
     }
 
-    @PutMapping("/regras")
-    public ResponseEntity<RegrasMedalha> salvarRegras(@RequestBody @Valid RegrasMedalha regras) {
-        return ResponseEntity.ok(regrasMedalhaService.salvar(regras));
+    @GetMapping("/{id}")
+    public ResponseEntity<Medalha> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(medalhaService.buscarPorId(id));
     }
 
-    @PostMapping("/regras/restaurar")
-    public ResponseEntity<RegrasMedalha> restaurarPadrao() {
-        return ResponseEntity.ok(regrasMedalhaService.restaurarPadrao());
+    @PostMapping
+    public ResponseEntity<Medalha> salvar(@RequestBody @Valid Medalha medalha) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(medalhaService.salvar(medalha));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Medalha> atualizar(@PathVariable Long id,
+                                             @RequestBody @Valid Medalha medalha) {
+        return ResponseEntity.ok(medalhaService.atualizar(id, medalha));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        medalhaService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/calcular")
     public ResponseEntity<List<MedalhaResultadoDTO>> calcular(
             @RequestParam int ano,
             @RequestParam int semestre) {
+        if (!configuracaoService.isGeracaoMedalhasAtiva()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         return ResponseEntity.ok(medalhaService.calcularMedalhasSemestre(ano, semestre));
     }
 
@@ -78,6 +93,23 @@ public class MedalhaController {
             @RequestParam int ano,
             @RequestParam int semestre) {
         medalhaService.enviarCertificadosTodos(ano, semestre);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/configuracao")
+    public ResponseEntity<Boolean> verificarGeracaoAtiva() {
+        return ResponseEntity.ok(configuracaoService.isGeracaoMedalhasAtiva());
+    }
+
+    @PostMapping("/configuracao/ativar")
+    public ResponseEntity<Void> ativarGeracao() {
+        configuracaoService.ativarGeracaoMedalhas();
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/configuracao/desativar")
+    public ResponseEntity<Void> desativarGeracao() {
+        configuracaoService.desativarGeracaoMedalhas();
         return ResponseEntity.ok().build();
     }
 }
