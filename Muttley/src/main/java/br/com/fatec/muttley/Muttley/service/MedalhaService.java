@@ -22,6 +22,8 @@ public class MedalhaService {
     private final InscricaoRepository inscricaoRepository;
     private final MedalhaRepository medalhaRepository;
     private final EmailService emailService;
+    private final CertificadoService certificadoService;
+    private final br.com.fatec.muttley.Muttley.repository.ParticipanteRepository participanteRepository;
 
     public List<Medalha> listar() {
         return medalhaRepository.findAllByOrderByPontosMinAsc();
@@ -106,15 +108,25 @@ public class MedalhaService {
     }
 
     public void enviarCertificadosTodos(int ano, int semestre) {
-        List<Inscricao> inscricoes = inscricaoRepository
-                .findByStatusAndSemestre(StatusInscricao.CONCLUIDO, ano, semestre);
+        List<MedalhaResultadoDTO> resultados = calcularMedalhasSemestre(ano, semestre);
 
-        for (Inscricao inscricao : inscricoes) {
+        for (MedalhaResultadoDTO resultado : resultados) {
+            if (resultado.getMedalha() == null) continue; // sem medalha, pula
+
             try {
-                emailService.enviarCertificado(inscricao.getId());
+                Participante participante = participanteRepository.findByCpf(resultado.getCpf())
+                        .orElse(null);
+                if (participante == null) continue;
+
+                byte[] pdf = certificadoService.gerarCertificadoMedalha(
+                        resultado.getParticipante(),
+                        resultado.getMedalha(),
+                        resultado.getPontos());
+
+                emailService.enviarCertificadoMedalha(participante.getEmail(), participante.getNome(), resultado.getMedalha(), pdf);
             } catch (Exception e) {
-                System.err.println("Erro ao enviar certificado para " +
-                        inscricao.getParticipante().getNome() + ": " + e.getMessage());
+                System.err.println("Erro ao enviar certificado de medalha para " +
+                        resultado.getParticipante() + ": " + e.getMessage());
             }
         }
     }

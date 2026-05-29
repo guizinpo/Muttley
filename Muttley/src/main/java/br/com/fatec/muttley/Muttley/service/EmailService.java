@@ -67,12 +67,16 @@ public class EmailService {
             String certificadosUrl = "http://localhost:8080/certificados.html?cpf=" + cpfCodificado;
 
             helper.setText(
-                    "<h2>Olá, " + nomeParticipante + "!</h2>" +
-                            "<p>Segue em anexo o seu certificado de participação no evento <strong>" +
-                            nomeEvento + "</strong>.</p>" +
-                            "<p><a href='" + linkedinUrl + "' target='_blank'>Adicionar ao LinkedIn</a></p>" +
-                            "<p><a href='" + certificadosUrl + "' target='_blank'>📋 Ver todos os meus certificados</a></p>" +
-                            "<br><p>Atenciosamente,<br><strong>Mutley — Gestão de Eventos Acadêmicos</strong></p>",
+                    "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;'>" +
+                            "<h2 style='color:#1a1a1a;'>Olá, " + nomeParticipante + "!</h2>" +
+                            "<p style='color:#444;font-size:15px;'>Segue em anexo o seu certificado de participação no evento <strong>" + nomeEvento + "</strong>.</p>" +
+                            "<div style='margin:24px 0;display:flex;gap:12px;'>" +
+                            "<a href='" + linkedinUrl + "' target='_blank' style='display:inline-block;padding:12px 20px;background:#0077B5;color:white;text-decoration:none;border-radius:8px;font-weight:bold;font-size:14px;'>🔗 Adicionar ao LinkedIn</a>" +
+                            "<a href='" + certificadosUrl + "' target='_blank' style='display:inline-block;padding:12px 20px;background:#6C3FC5;color:white;text-decoration:none;border-radius:8px;font-weight:bold;font-size:14px;'>📋 Ver meus certificados</a>" +
+                            "</div>" +
+                            "<hr style='border:none;border-top:1px solid #eee;margin:24px 0;'/>" +
+                            "<p style='color:#999;font-size:13px;'>Atenciosamente,<br><strong style='color:#444;'>Mutley — Gestão de Eventos Acadêmicos</strong></p>" +
+                            "</div>",
                     true);
 
             helper.addAttachment("certificado.pdf", new org.springframework.core.io.ByteArrayResource(pdf));
@@ -110,6 +114,31 @@ public class EmailService {
 
         } catch (MessagingException e) {
             throw new RuntimeException("Erro ao enviar e-mail", e);
+        }
+    }
+
+    public void enviarCertificadoMedalha(String emailDestinatario, String nomeParticipante, String nomeMedalha, byte[] pdf) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(emailDestinatario);
+            helper.setSubject("Certificado de Medalha — " + nomeMedalha + " — Mutley");
+            helper.setText(
+                    "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;'>" +
+                            "<h2 style='color:#1a1a1a;'>Olá, " + nomeParticipante + "!</h2>" +
+                            "<p style='color:#444;font-size:15px;'>Parabéns! Você conquistou a medalha <strong>" + nomeMedalha + "</strong> neste semestre.</p>" +
+                            "<p style='color:#444;font-size:15px;'>Segue em anexo o seu certificado de medalha.</p>" +
+                            "<hr style='border:none;border-top:1px solid #eee;margin:24px 0;'/>" +
+                            "<p style='color:#999;font-size:13px;'>Atenciosamente,<br><strong style='color:#444;'>Mutley — Gestão de Eventos Acadêmicos</strong></p>" +
+                            "</div>",
+                    true);
+
+            helper.addAttachment("certificado-medalha.pdf", new org.springframework.core.io.ByteArrayResource(pdf));
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Erro ao enviar e-mail de medalha", e);
         }
     }
 }

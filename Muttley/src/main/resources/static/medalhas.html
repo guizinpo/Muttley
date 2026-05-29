@@ -389,16 +389,29 @@
     }
 
     // ── Toggle Geração ───────────────────────────────────────────
+    function toggleGeracao() {
+        if (!geracaoAtiva) {
+            document.getElementById('modal-confirmar-ativacao').classList.remove('hidden');
+        } else {
+            authFetch(`${BASE_URL}/api/medalhas/configuracao/desativar`, { method: 'POST' })
+                .then(() => atualizarToggle(false));
+        }
+    }
+
+    function fecharModalAtivacao() {
+        document.getElementById('modal-confirmar-ativacao').classList.add('hidden');
+    }
+
+    function confirmarAtivacao() {
+        fecharModalAtivacao();
+        authFetch(`${BASE_URL}/api/medalhas/configuracao/ativar`, { method: 'POST' })
+            .then(() => atualizarToggle(true));
+    }
+
     function carregarStatusGeracao() {
         authFetch(`${BASE_URL}/api/medalhas/configuracao`)
             .then(res => res.json())
             .then(ativo => atualizarToggle(ativo));
-    }
-
-    function toggleGeracao() {
-        const endpoint = geracaoAtiva ? '/api/medalhas/configuracao/desativar' : '/api/medalhas/configuracao/ativar';
-        authFetch(`${BASE_URL}${endpoint}`, { method: 'POST' })
-            .then(() => atualizarToggle(!geracaoAtiva));
     }
 
     function atualizarToggle(ativo) {
@@ -445,19 +458,36 @@
 
     function gerarTodos() {
         const [ano, semestre] = document.getElementById('semestre').value.split('-');
+        const btn = document.querySelector('button[onclick="gerarTodos()"]');
+        btn.disabled = true;
+        btn.textContent = '⏳ Enviando...';
+
         authFetch(`${BASE_URL}/api/medalhas/enviar-certificados?ano=${ano}&semestre=${semestre}`, { method: 'POST' })
             .then(res => {
                 if (res.ok) {
+                    btn.textContent = '✅ Enviado!';
                     const t = document.getElementById('toast-gerado');
                     t.classList.remove('hidden');
-                    setTimeout(() => t.classList.add('hidden'), 5000);
+                    setTimeout(() => {
+                        t.classList.add('hidden');
+                        btn.disabled = false;
+                        btn.textContent = '🏅 Gerar Todos os Certificados';
+                    }, 5000);
                 }
             })
-            .catch(() => alert('Erro ao enviar certificados.'));
+            .catch(() => {
+                alert('Erro ao enviar certificados.');
+                btn.disabled = false;
+                btn.textContent = '🏅 Gerar Todos os Certificados';
+        });
     }
 
     function exportarCSV() {
         const [ano, semestre] = document.getElementById('semestre').value.split('-');
+        const btn = document.querySelector('button[onclick="exportarCSV()"]');
+        btn.disabled = true;
+        btn.textContent = '⏳ Exportando...';
+
         authFetch(`${BASE_URL}/api/medalhas/exportar?ano=${ano}&semestre=${semestre}`)
             .then(res => res.blob())
             .then(blob => {
@@ -467,6 +497,13 @@
                 a.download = `medalhas_${semestre}_${ano}.csv`;
                 a.click();
                 window.URL.revokeObjectURL(url);
+                btn.disabled = false;
+                btn.textContent = '⬇️ Exportar CSV';
+            })
+            .catch(() => {
+                alert('Erro ao exportar.');
+                btn.disabled = false;
+                btn.textContent = '⬇️ Exportar CSV';
             });
     }
 
@@ -488,5 +525,16 @@
         document.getElementById('tab-gerar').classList.toggle('hidden', tab !== 'gerar');
     }
 </script>
+<div id="modal-confirmar-ativacao" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h3>⚠️ Ativar Geração de Certificados</h3>
+        <p>Tem certeza que deseja ativar a geração de certificados de medalha?</p>
+        <p style="font-size:0.875rem;color:var(--gray-500);margin-top:8px;">Esta ação indica que o semestre foi encerrado e os certificados de medalha poderão ser emitidos.</p>
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="fecharModalAtivacao()">Cancelar</button>
+            <button class="btn btn-primary" onclick="confirmarAtivacao()">Sim, ativar</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>

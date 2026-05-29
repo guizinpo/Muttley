@@ -67,7 +67,7 @@
         <div class="feedback-icon">✅</div>
         <h3>Presença confirmada!</h3>
         <p>Sua presença no evento <strong id="sucesso-evento"></strong> foi confirmada com sucesso!</p>
-        <p style="margin-top:8px;font-size:0.9rem;color:var(--gray-500);">Em breve você receberá seu certificado por e-mail.</p>
+        <p style="margin-top:8px;font-size:0.9rem;color:var(--gray-500);">📧 Certificado enviado para o seu e-mail!</p>
     </div>
 
     <p class="powered-by">Powered by Mutley · Gestão de Eventos Acadêmicos</p>
@@ -113,14 +113,18 @@
     }
 
     function confirmar(e) {
-      e.preventDefault();
-      const cpf = document.getElementById('cpf').value;
+        e.preventDefault();
+        const cpf = document.getElementById('cpf').value;
 
-      if (!/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(cpf)) {
-        document.getElementById('err-cpf').textContent = 'CPF inválido.';
-        return;
-      }
+        if (!/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(cpf)) {
+            document.getElementById('err-cpf').textContent = 'CPF inválido.';
+            return;
+        }
       document.getElementById('err-cpf').textContent = '';
+
+      const btn = document.querySelector('#form-participacao button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '⏳ Confirmando...';
 
       fetch(`${BASE_URL}/api/public/participacao/${token}?cpf=${encodeURIComponent(cpf)}`, {
         method: 'POST'
@@ -133,9 +137,16 @@
         })
         .then(data => {
           if (!data) return;
-          mostrarEstado('sucesso');
+          btn.textContent = '✅ Confirmado!';
+          setTimeout(() => {
+            mostrarEstado('sucesso');
+          }, 1000);
         })
-        .catch(() => mostrarEstado('erro'));
+        .catch(() => {
+          mostrarEstado('erro');
+          btn.disabled = false;
+          btn.textContent = 'Confirmar Presença';
+        });
     }
 
     function mostrarEstado(estado) {

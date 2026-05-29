@@ -152,17 +152,26 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       })
-        .then(res => {
-          if (res.status === 409) { mostrarEstado('ja-inscrito'); return null; }
+      .then(async res => {
+          if (res.status === 409) {
+              const msg = await res.text();
+              if (msg.includes('E-mail')) {
+                  document.getElementById('erro-geral').textContent = 'Este e-mail já está cadastrado. Use outro e-mail.';
+                  document.getElementById('erro-geral').classList.remove('hidden');
+              } else {
+                  mostrarEstado('ja-inscrito');
+              }
+              return null;
+          }
           if (!res.ok) { mostrarEstado('erro'); return null; }
-          return res.json();
-        })
-        .then(data => {
+            return res.json();
+      })
+      .then(data => {
           if (!data) return;
-          document.getElementById('sucesso-nome').textContent = body.nome;
-          mostrarEstado('sucesso');
-        })
-        .catch(() => mostrarEstado('erro'));
+            document.getElementById('sucesso-nome').textContent = body.nome;
+            mostrarEstado('sucesso');
+      })
+      .catch(() => mostrarEstado('erro'));
     }
 
     function mostrarEstado(estado) {
