@@ -123,7 +123,6 @@
         { id: 'nome', errId: 'err-nome', msg: 'Informe seu nome.', check: v => v.trim().length >= 3 },
         { id: 'cpf', errId: 'err-cpf', msg: 'CPF inválido.', check: v => validarCPF(v) },
         { id: 'email', errId: 'err-email', msg: 'Informe um e-mail válido.', check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
-        { id: 'tipo', errId: 'err-tipo', msg: 'Selecione o tipo.', check: v => v !== '' },
       ];
 
       campos.forEach(c => {
@@ -145,7 +144,7 @@
         nome: document.getElementById('nome').value,
         cpf: document.getElementById('cpf').value,
         email: document.getElementById('email').value,
-        tipo: document.getElementById('tipo').value
+        tipo: 'OUVINTE'
       };
 
       fetch(`${BASE_URL}/api/public/inscricao/${token}`, {

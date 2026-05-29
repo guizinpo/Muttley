@@ -24,6 +24,8 @@ public interface InscricaoRepository extends JpaRepository<Inscricao, Long> {
 
     long countByEventoId(Long eventoId);
 
+    List<Inscricao> findByParticipanteIdAndStatus(Long participanteId, StatusInscricao status);
+
     @Query("SELECT SUM(i.evento.pontos) FROM Inscricao i " +
             "WHERE i.participante.id = :participanteId " +
             "AND i.status = :status " +

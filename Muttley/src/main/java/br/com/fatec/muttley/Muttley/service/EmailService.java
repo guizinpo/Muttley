@@ -33,10 +33,20 @@ public class EmailService {
         String nomeParticipante = inscricao.getParticipante().getNome();
         String emailDestinatario = inscricao.getParticipante().getEmail();
 
+        String nomeEventoCodificado;
+        String orgCodificada;
+        try {
+            nomeEventoCodificado = java.net.URLEncoder.encode(nomeEvento, "UTF-8");
+            orgCodificada = java.net.URLEncoder.encode("Fatec Zona Leste", "UTF-8");
+        } catch (Exception ex) {
+            nomeEventoCodificado = nomeEvento.replace(" ", "%20");
+            orgCodificada = "Fatec+Zona+Leste";
+        }
+
         String linkedinUrl = "https://www.linkedin.com/profile/add"
                 + "?startTask=CERTIFICATION_NAME"
-                + "&name=" + nomeEvento.replace(" ", "%20")
-                + "&organizationName=Fatec"
+                + "&name=" + nomeEventoCodificado
+                + "&organizationName=" + orgCodificada
                 + "&issueYear=" + inscricao.getEvento().getDataEvento().getYear()
                 + "&issueMonth=" + inscricao.getEvento().getDataEvento().getMonthValue();
 
@@ -46,12 +56,22 @@ public class EmailService {
 
             helper.setTo(emailDestinatario);
             helper.setSubject("Certificado de Participação — " + nomeEvento);
+
+            String cpfCodificado;
+            try {
+                cpfCodificado = java.net.URLEncoder.encode(inscricao.getParticipante().getCpf(), "UTF-8");
+            } catch (Exception ex) {
+                cpfCodificado = inscricao.getParticipante().getCpf();
+            }
+
+            String certificadosUrl = "http://localhost:8080/certificados.html?cpf=" + cpfCodificado;
+
             helper.setText(
                     "<h2>Olá, " + nomeParticipante + "!</h2>" +
                             "<p>Segue em anexo o seu certificado de participação no evento <strong>" +
                             nomeEvento + "</strong>.</p>" +
-                            "<p><a href='" + linkedinUrl + "' target='_blank'>" +
-                            "Adicionar ao LinkedIn</a></p>" +
+                            "<p><a href='" + linkedinUrl + "' target='_blank'>Adicionar ao LinkedIn</a></p>" +
+                            "<p><a href='" + certificadosUrl + "' target='_blank'>📋 Ver todos os meus certificados</a></p>" +
                             "<br><p>Atenciosamente,<br><strong>Mutley — Gestão de Eventos Acadêmicos</strong></p>",
                     true);
 

@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/*.html", "/*.css", "/*.js").permitAll()
                         .requestMatchers("/api/eventos/*/qrcode/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

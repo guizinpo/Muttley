@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -86,5 +87,34 @@ public class InscricaoService {
     public Page<Inscricao> listarPorParticipante(Long participanteId, Pageable pageable) {
         participanteService.buscarPorId(participanteId);
         return repository.findByParticipanteId(participanteId, pageable);
+    }
+
+    public List<Inscricao> buscarConcluidosPorCpf(String cpf) {
+        Participante participante = participanteService.buscarPorCpf(cpf)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "CPF não encontrado"));
+        return repository.findByParticipanteIdAndStatus(
+                participante.getId(), StatusInscricao.CONCLUIDO);
+    }
+
+    public Inscricao buscarPorIdECpf(Long inscricaoId, String cpf) {
+        Inscricao inscricao = repository.findById(inscricaoId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Inscrição não encontrada"));
+        if (!inscricao.getParticipante().getCpf().equals(cpf)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
+        }
+        return inscricao;
+    }
+
+    public void enviarTodosCertificados(String cpf) {
+        List<Inscricao> inscricoes = buscarConcluidosPorCpf(cpf);
+        for (Inscricao inscricao : inscricoes) {
+            try {
+                emailService.enviarCertificado(inscricao.getId());
+            } catch (Exception e) {
+                System.err.println("Erro ao enviar certificado " + inscricao.getId() + ": " + e.getMessage());
+            }
+        }
     }
 }

@@ -229,7 +229,10 @@
                     return;
                 }
                 empty.style.display = 'none';
-                lista.innerHTML = '';
+
+                Array.from(lista.children).forEach(child => {
+                    if (child.id !== 'empty-medalhas') child.remove();
+                });
 
                 data.forEach(m => {
                     const card = document.createElement('div');
