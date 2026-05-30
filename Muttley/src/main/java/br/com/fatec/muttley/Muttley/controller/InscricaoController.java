@@ -49,7 +49,7 @@ public class InscricaoController {
     }
 
     @PostMapping("/{id}/enviar-certificado")
-    public ResponseEntity<Void> enviarCertificado(@PathVariable Long id) throws UnsupportedEncodingException {
+    public ResponseEntity<Void> enviarCertificado(@PathVariable Long id) throws Exception {
         emailService.enviarCertificado(id);
         return ResponseEntity.ok().build();
     }
