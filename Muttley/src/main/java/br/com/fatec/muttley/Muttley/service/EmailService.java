@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,6 +25,7 @@ public class EmailService {
     private final InscricaoRepository inscricaoRepository;
     private final PalestranteRepository palestranteRepository;
 
+    @Async
     public void enviarCertificado(Long inscricaoId) throws UnsupportedEncodingException {
         Inscricao inscricao = inscricaoRepository.findById(inscricaoId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -91,6 +93,7 @@ public class EmailService {
         }
     }
 
+    @Async
     public void enviarCertificadoPalestrante(Long palestranteId) {
         Palestrante palestrante = palestranteRepository.findById(palestranteId)
                 .orElseThrow(() -> new ResponseStatusException(
