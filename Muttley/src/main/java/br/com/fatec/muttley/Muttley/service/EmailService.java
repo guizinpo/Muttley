@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
@@ -37,40 +38,25 @@ public class EmailService {
         String nomeParticipante = inscricao.getParticipante().getNome();
         String emailDestinatario = inscricao.getParticipante().getEmail();
 
-        String nomeEventoCodificado;
-        String orgCodificada;
-        try {
-            nomeEventoCodificado = java.net.URLEncoder.encode(nomeEvento, java.nio.charset.StandardCharsets.UTF_8.toString());
-            orgCodificada = java.net.URLEncoder.encode("Fatec Zona Leste", java.nio.charset.StandardCharsets.UTF_8.toString());
-        } catch (Exception ex) {
-            nomeEventoCodificado = nomeEvento.replace(" ", "%20");
-            orgCodificada = "Fatec+Zona+Leste";
-        }
+        String nomeEventoCodificado = java.net.URLEncoder.encode(nomeEvento, StandardCharsets.UTF_8);
+        String orgCodificada = java.net.URLEncoder.encode("Fatec Zona Leste", StandardCharsets.UTF_8);
+        String cpfCodificado = java.net.URLEncoder.encode(inscricao.getParticipante().getCpf(), StandardCharsets.UTF_8);
 
         String linkedinUrl = "https://www.linkedin.com/profile/add"
                 + "?startTask=CERTIFICATION_NAME"
                 + "&name=" + nomeEventoCodificado
                 + "&organizationName=" + orgCodificada
                 + "&issueYear=" + inscricao.getEvento().getDataEvento().getYear()
-                + "&issueMonth=" + inscricao.getEvento().getDataEvento().getMonthValue()
-                + "&certUrl=" + java.net.URLEncoder.encode("https://muttley-production.up.railway.app/certificados.html?cpf=" + inscricao.getParticipante().getCpf(), java.nio.charset.StandardCharsets.UTF_8);
+                + "&issueMonth=" + inscricao.getEvento().getDataEvento().getMonthValue();
+
+        String certificadosUrl = "http://localhost:8080/certificados.html?cpf=" + cpfCodificado;
+
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom("muttley.fatec@gmail.com", "Mutley Fatec");
-
             helper.setTo(emailDestinatario);
             helper.setSubject("Certificado de Participação — " + nomeEvento);
-
-            String cpfCodificado;
-            try {
-                cpfCodificado = java.net.URLEncoder.encode(inscricao.getParticipante().getCpf(), java.nio.charset.StandardCharsets.UTF_8);
-            } catch (Exception ex) {
-                cpfCodificado = inscricao.getParticipante().getCpf();
-            }
-
-            String certificadosUrl = "https://muttley-production.up.railway.app/certificados.html?cpf=" + cpfCodificado;
-
             helper.setText(
                     "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;'>" +
                             "<h2 style='color:#1a1a1a;'>Olá, " + nomeParticipante + "!</h2>" +
@@ -83,15 +69,11 @@ public class EmailService {
                             "<p style='color:#999;font-size:13px;'>Atenciosamente,<br><strong style='color:#444;'>Mutley — Gestão de Eventos Acadêmicos</strong></p>" +
                             "</div>",
                     true);
-
             helper.addAttachment("certificado.pdf", new org.springframework.core.io.ByteArrayResource(pdf));
-
             mailSender.send(message);
 
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             throw new RuntimeException("Erro ao enviar e-mail", e);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -107,7 +89,6 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom("muttley.fatec@gmail.com", "Mutley Fatec");
-
             helper.setTo(palestrante.getEmail());
             helper.setSubject("Certificado de Palestrante — Mutley");
             helper.setText(
@@ -115,24 +96,19 @@ public class EmailService {
                             "<p>Segue em anexo o seu certificado de participação como palestrante nos eventos da Fatec.</p>" +
                             "<br><p>Atenciosamente,<br><strong>Mutley — Gestão de Eventos Acadêmicos</strong></p>",
                     true);
-
             helper.addAttachment("certificado-palestrante.pdf",
                     new org.springframework.core.io.ByteArrayResource(pdf));
-
             mailSender.send(message);
 
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             throw new RuntimeException("Erro ao enviar e-mail", e);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
         }
     }
 
     public void enviarCertificadoMedalha(String emailDestinatario, String nomeParticipante, String nomeMedalha, byte[] pdf) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setTo(emailDestinatario);
             helper.setSubject("Certificado de Medalha — " + nomeMedalha + " — Mutley");
             helper.setText(
@@ -144,7 +120,6 @@ public class EmailService {
                             "<p style='color:#999;font-size:13px;'>Atenciosamente,<br><strong style='color:#444;'>Mutley — Gestão de Eventos Acadêmicos</strong></p>" +
                             "</div>",
                     true);
-
             helper.addAttachment("certificado-medalha.pdf", new org.springframework.core.io.ByteArrayResource(pdf));
             mailSender.send(message);
 

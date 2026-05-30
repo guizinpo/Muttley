@@ -1,4 +1,4 @@
-const BASE_URL = 'https://muttley-production.up.railway.app';
+const BASE_URL = 'http://localhost:8080';
 
 function getToken() {
   return sessionStorage.getItem('token');
