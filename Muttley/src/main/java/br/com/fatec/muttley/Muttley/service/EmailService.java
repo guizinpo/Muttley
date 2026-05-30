@@ -26,7 +26,7 @@ public class EmailService {
     private final PalestranteRepository palestranteRepository;
 
     @Async
-    public void enviarCertificado(Long inscricaoId) throws UnsupportedEncodingException {
+    public void enviarCertificado(Long inscricaoId) {
         Inscricao inscricao = inscricaoRepository.findById(inscricaoId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Inscrição não encontrada"));
@@ -40,8 +40,8 @@ public class EmailService {
         String nomeEventoCodificado;
         String orgCodificada;
         try {
-            nomeEventoCodificado = java.net.URLEncoder.encode(nomeEvento, "UTF-8");
-            orgCodificada = java.net.URLEncoder.encode("Fatec Zona Leste", "UTF-8");
+            nomeEventoCodificado = java.net.URLEncoder.encode(nomeEvento, java.nio.charset.StandardCharsets.UTF_8.toString());
+            orgCodificada = java.net.URLEncoder.encode("Fatec Zona Leste", java.nio.charset.StandardCharsets.UTF_8.toString());
         } catch (Exception ex) {
             nomeEventoCodificado = nomeEvento.replace(" ", "%20");
             orgCodificada = "Fatec+Zona+Leste";
@@ -53,18 +53,18 @@ public class EmailService {
                 + "&organizationName=" + orgCodificada
                 + "&issueYear=" + inscricao.getEvento().getDataEvento().getYear()
                 + "&issueMonth=" + inscricao.getEvento().getDataEvento().getMonthValue()
-                + "&certUrl=" + java.net.URLEncoder.encode("https://muttley-production.up.railway.app/certificados.html?cpf=" + inscricao.getParticipante().getCpf(), "UTF-8");
-
+                + "&certUrl=" + java.net.URLEncoder.encode("https://muttley-production.up.railway.app/certificados.html?cpf=" + inscricao.getParticipante().getCpf(), java.nio.charset.StandardCharsets.UTF_8);
         try {
             MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom("muttley.fatec@gmail.com", "Mutley Fatec");
 
             helper.setTo(emailDestinatario);
             helper.setSubject("Certificado de Participação — " + nomeEvento);
 
             String cpfCodificado;
             try {
-                cpfCodificado = java.net.URLEncoder.encode(inscricao.getParticipante().getCpf(), "UTF-8");
+                cpfCodificado = java.net.URLEncoder.encode(inscricao.getParticipante().getCpf(), java.nio.charset.StandardCharsets.UTF_8);
             } catch (Exception ex) {
                 cpfCodificado = inscricao.getParticipante().getCpf();
             }
@@ -90,6 +90,8 @@ public class EmailService {
 
         } catch (MessagingException e) {
             throw new RuntimeException("Erro ao enviar e-mail", e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -103,7 +105,8 @@ public class EmailService {
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom("muttley.fatec@gmail.com", "Mutley Fatec");
 
             helper.setTo(palestrante.getEmail());
             helper.setSubject("Certificado de Palestrante — Mutley");
@@ -120,6 +123,8 @@ public class EmailService {
 
         } catch (MessagingException e) {
             throw new RuntimeException("Erro ao enviar e-mail", e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
     }
 
