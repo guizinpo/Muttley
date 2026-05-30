@@ -119,23 +119,28 @@
       const medalBadge = document.getElementById('medal-badge');
       const breakdown = document.getElementById('points-breakdown');
 
-      if (medalha) {
-        medalBadge.innerHTML = `<span class="medal-icon">🏅</span><span class="medal-name">Medalha ${medalha}</span>`;
-        medalBadge.className = 'medal-badge medal-earned';
-      } else {
-        medalBadge.innerHTML = `<span class="medal-icon">—</span><span class="medal-name">Sem medalha ainda</span>`;
-        medalBadge.className = 'medal-badge';
-      }
-
       authFetch(`${BASE_URL}/api/medalhas`)
-        .then(res => res.json())
-        .then(medalhas => {
-            breakdown.innerHTML = medalhas.map(m =>
-                `<span class="breakdown-item ${medalha === m.nome ? 'active-range' : ''}">
-                    ${m.nome}: ${m.pontosMin}–${m.pontosMax} pts${medalha === m.nome ? ' ✓' : ''}
-                </span>`
-            ).join('');
-        });
+          .then(res => res.json())
+          .then(medalhas => {
+              const medalhaObj = medalhas.find(m => m.nome === medalha);
+
+              if (medalha && medalhaObj) {
+                  medalBadge.innerHTML = medalhaObj.imagemUrl
+                      ? `<img src="${medalhaObj.imagemUrl}" style="width:64px;height:64px;object-fit:contain;margin-bottom:4px;"/>
+                         <span class="medal-name">Medalha ${medalha}</span>`
+                      : `<span class="medal-icon">🏅</span><span class="medal-name">Medalha ${medalha}</span>`;
+                  medalBadge.className = 'medal-badge medal-earned';
+              } else {
+                  medalBadge.innerHTML = `<span class="medal-icon">—</span><span class="medal-name">Sem medalha ainda</span>`;
+                  medalBadge.className = 'medal-badge';
+              }
+
+              breakdown.innerHTML = medalhas.map(m =>
+                  `<span class="breakdown-item ${medalha === m.nome ? 'active-range' : ''}">
+                      ${m.nome}: ${m.pontosMin}–${m.pontosMax} pts${medalha === m.nome ? ' ✓' : ''}
+                  </span>`
+              ).join('');
+          });
     }
 
     function carregarInscricoes() {

@@ -26,6 +26,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import br.com.fatec.muttley.Muttley.repository.MedalhaRepository;
+import br.com.fatec.muttley.Muttley.entity.Medalha;
+import com.itextpdf.layout.element.Image;
+import com.itextpdf.io.image.ImageDataFactory;
 
 import java.util.List;
 import java.io.ByteArrayOutputStream;
@@ -39,6 +43,7 @@ public class CertificadoService {
     private final InscricaoRepository inscricaoRepository;
     private final EventoRepository eventoRepository;
     private final PalestranteRepository palestranteRepository;
+    private final MedalhaRepository medalhaRepository;
 
     // Cores do template
     private static final Color AMARELO      = new DeviceRgb(0xF5, 0xC5, 0x18); // amarelo dourado
@@ -437,23 +442,45 @@ public class CertificadoService {
                     .setFont(fonteBold).setFontSize(22).setFontColor(PRETO)
                     .setTextAlignment(TextAlignment.CENTER).setMarginBottom(16));
 
+            // Imagem da medalha
+            Medalha medalhaObj = medalhaRepository.findAll().stream()
+                    .filter(m -> m.getNome().equals(nomeMedalha))
+                    .findFirst().orElse(null);
+
+            if (medalhaObj != null && medalhaObj.getImagemUrl() != null) {
+                try {
+                    java.io.File imgFile = new java.io.File("." + medalhaObj.getImagemUrl());
+                    if (imgFile.exists()) {
+                        Image img = new Image(ImageDataFactory.create(imgFile.getAbsolutePath()));
+                        img.setWidth(80).setHeight(80).setHorizontalAlignment(
+                                com.itextpdf.layout.properties.HorizontalAlignment.CENTER);
+                        document.add(img);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Erro ao carregar imagem da medalha: " + e.getMessage());
+                }
+            }
+
             document.add(new Paragraph()
                     .add(new Text("Por atingir a medalha ").setFont(fonteNormal).setFontColor(CINZA_TEXTO))
                     .add(new Text(nomeMedalha).setFont(fonteBold).setFontColor(PRETO))
                     .add(new Text(" com ").setFont(fonteNormal).setFontColor(CINZA_TEXTO))
                     .add(new Text(String.format("%.1f", pontos) + " pontos").setFont(fonteBold).setFontColor(PRETO))
                     .add(new Text(" acumulados no semestre, promovido pela FATEC Zona Leste.").setFont(fonteNormal).setFontColor(CINZA_TEXTO))
-                    .setFontSize(13).setTextAlignment(TextAlignment.JUSTIFIED).setMarginBottom(20));
+                    .setFontSize(13).setTextAlignment(TextAlignment.CENTER).setMarginBottom(20));
 
             String hoje = java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             document.add(new Paragraph("São Paulo, " + hoje)
                     .setFont(fonteNormal).setFontSize(13).setFontColor(CINZA_TEXTO)
                     .setTextAlignment(TextAlignment.CENTER).setMarginBottom(30));
 
-            Canvas signCanvas = new Canvas(new PdfCanvas(page), new Rectangle(W / 2 - 120, 115, 240, 2));
-            signCanvas.add(new Paragraph("_______________________________")
-                    .setFontColor(CINZA_TEXTO).setFontSize(11).setTextAlignment(TextAlignment.CENTER));
-            signCanvas.close();
+            // Remove o Canvas signCanvas e troca por:
+            document.add(new Paragraph("___________________________")
+                    .setFont(fonteNormal)
+                    .setFontSize(11)
+                    .setFontColor(CINZA_TEXTO)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(4));
 
             document.add(new Paragraph("Coordenador do curso de Análise e Desenvolvimento de\nSistemas da FATEC Zona Leste")
                     .setFont(fonteNormal).setFontSize(10).setFontColor(CINZA_TEXTO)
