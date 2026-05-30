@@ -11,6 +11,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
+
 @RestController
 @RequestMapping("/api/inscricoes")
 @RequiredArgsConstructor
@@ -47,7 +49,7 @@ public class InscricaoController {
     }
 
     @PostMapping("/{id}/enviar-certificado")
-    public ResponseEntity<Void> enviarCertificado(@PathVariable Long id) {
+    public ResponseEntity<Void> enviarCertificado(@PathVariable Long id) throws UnsupportedEncodingException {
         emailService.enviarCertificado(id);
         return ResponseEntity.ok().build();
     }
