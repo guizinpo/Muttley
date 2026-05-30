@@ -13,6 +13,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.UnsupportedEncodingException;
+
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -22,7 +24,7 @@ public class EmailService {
     private final InscricaoRepository inscricaoRepository;
     private final PalestranteRepository palestranteRepository;
 
-    public void enviarCertificado(Long inscricaoId) {
+    public void enviarCertificado(Long inscricaoId) throws UnsupportedEncodingException {
         Inscricao inscricao = inscricaoRepository.findById(inscricaoId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Inscrição não encontrada"));
@@ -48,7 +50,8 @@ public class EmailService {
                 + "&name=" + nomeEventoCodificado
                 + "&organizationName=" + orgCodificada
                 + "&issueYear=" + inscricao.getEvento().getDataEvento().getYear()
-                + "&issueMonth=" + inscricao.getEvento().getDataEvento().getMonthValue();
+                + "&issueMonth=" + inscricao.getEvento().getDataEvento().getMonthValue()
+                + "&certUrl=" + java.net.URLEncoder.encode("https://muttley-production.up.railway.app/certificados.html?cpf=" + inscricao.getParticipante().getCpf(), "UTF-8");
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -64,7 +67,7 @@ public class EmailService {
                 cpfCodificado = inscricao.getParticipante().getCpf();
             }
 
-            String certificadosUrl = "http://localhost:8080/certificados.html?cpf=" + cpfCodificado;
+            String certificadosUrl = "https://muttley-production.up.railway.app/certificados.html?cpf=" + cpfCodificado;
 
             helper.setText(
                     "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;'>" +
