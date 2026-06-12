@@ -98,11 +98,7 @@
                     <div class="filter-bar" style="margin-bottom:20px;">
                         <div class="form-group" style="min-width:200px;">
                             <label for="semestre">Semestre de Referência</label>
-                            <select id="semestre">
-                                <option value="2026-1">1º Semestre / 2026</option>
-                                <option value="2025-2">2º Semestre / 2025</option>
-                                <option value="2025-1">1º Semestre / 2025</option>
-                            </select>
+                            <select id="semestre"></select>
                         </div>
                         <div style="padding-top:22px;">
                             <button class="btn btn-primary" onclick="calcular()">🔄 Calcular</button>
@@ -215,6 +211,7 @@
     // ── Init ─────────────────────────────────────────────────────
     carregarMedalhas();
     carregarStatusGeracao();
+    preencherSemestres();
 
     // ── Medalhas ─────────────────────────────────────────────────
     function carregarMedalhas() {
@@ -544,22 +541,44 @@
         document.getElementById('tab-medalhas').classList.toggle('hidden', tab !== 'medalhas');
         document.getElementById('tab-gerar').classList.toggle('hidden', tab !== 'gerar');
     }
+
+    function preencherSemestres() {
+        const select = document.getElementById('semestre');
+        const anoAtual = new Date().getFullYear();
+        const mesAtual = new Date().getMonth() + 1;
+        const semestres = [];
+
+        // gera os últimos 2 anos + atual
+        for (let ano = anoAtual; ano >= anoAtual - 2; ano--) {
+            semestres.push({ value: `${ano}-2`, label: `2º Semestre / ${ano}` });
+            semestres.push({ value: `${ano}-1`, label: `1º Semestre / ${ano}` });
+        }
+
+        select.innerHTML = semestres
+            .map(s => `<option value="${s.value}">${s.label}</option>`)
+            .join('');
+
+        // seleciona o semestre atual automaticamente
+        const semestreAtual = mesAtual <= 6 ? `${anoAtual}-1` : `${anoAtual}-2`;
+        select.value = semestreAtual;
+    }
 </script>
 <div id="modal-confirmar-ativacao" class="modal-overlay hidden">
-    <div class="form-group" style="margin-top:16px;">
-        <label for="input-senha-ativacao">Senha do administrador</label>
-        <input type="password" id="input-senha-ativacao" placeholder="Digite a senha"/>
-        <span class="field-error" id="err-senha-ativacao"></span>
-    </div>
     <div class="modal-card">
         <h3>⚠️ Ativar Geração de Certificados</h3>
         <p>Tem certeza que deseja ativar a geração de certificados de medalha?</p>
         <p style="font-size:0.875rem;color:var(--gray-500);margin-top:8px;">Esta ação indica que o semestre foi encerrado e os certificados de medalha poderão ser emitidos.</p>
+        <div class="form-group" style="margin-top:16px;">
+            <label for="input-senha-ativacao">Senha do administrador</label>
+            <input type="password" id="input-senha-ativacao" placeholder="Digite a senha"/>
+            <span class="field-error" id="err-senha-ativacao"></span>
+        </div>
         <div class="modal-actions">
             <button class="btn btn-ghost" onclick="fecharModalAtivacao()">Cancelar</button>
             <button class="btn btn-primary" onclick="confirmarAtivacao()">Sim, ativar</button>
         </div>
     </div>
+</div>
 </div>
 </body>
 </html>
