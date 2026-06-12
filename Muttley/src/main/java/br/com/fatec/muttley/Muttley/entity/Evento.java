@@ -68,4 +68,7 @@ public class Evento {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusEvento status = StatusEvento.ATIVO;
+
+    @Column
+    private String assinaturaUrl;
 }

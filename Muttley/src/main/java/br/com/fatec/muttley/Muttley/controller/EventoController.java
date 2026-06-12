@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/eventos")
@@ -92,5 +93,27 @@ public class EventoController {
     @PutMapping("/{id}/encerrar")
     public ResponseEntity<Evento> encerrar(@PathVariable Long id) {
         return ResponseEntity.ok(service.encerrar(id));
+    }
+
+    @PostMapping("/{id}/upload-assinatura")
+    public ResponseEntity<Map<String, String>> uploadAssinatura(
+            @PathVariable Long id,
+            @RequestParam("arquivo") org.springframework.web.multipart.MultipartFile arquivo) {
+        try {
+            String nomeArquivo = System.currentTimeMillis() + "_" + arquivo.getOriginalFilename();
+            String pastaUploads = System.getProperty("user.dir") + "/uploads/assinaturas/";
+            java.nio.file.Path destino = java.nio.file.Paths.get(pastaUploads + nomeArquivo);
+            java.nio.file.Files.createDirectories(destino.getParent());
+            arquivo.transferTo(destino.toFile());
+            String url = "/uploads/assinaturas/" + nomeArquivo;
+
+            Evento evento = service.buscarPorId(id);
+            evento.setAssinaturaUrl(url);
+            service.salvarDireto(evento);
+
+            return ResponseEntity.ok(Map.of("url", url));
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao fazer upload da assinatura", e);
+        }
     }
 }

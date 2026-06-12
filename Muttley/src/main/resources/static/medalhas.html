@@ -392,7 +392,15 @@
     function toggleGeracao() {
         if (!geracaoAtiva) {
             document.getElementById('modal-confirmar-ativacao').classList.remove('hidden');
+            document.getElementById('input-senha-ativacao').value = '';
+            document.getElementById('err-senha-ativacao').textContent = '';
         } else {
+            const senha = prompt('Digite a senha do administrador para desativar:');
+            if (!senha) return;
+            if (senha !== 'mutley2026') {
+                alert('Senha incorreta.');
+                return;
+            }
             authFetch(`${BASE_URL}/api/medalhas/configuracao/desativar`, { method: 'POST' })
                 .then(() => atualizarToggle(false));
         }
@@ -403,9 +411,21 @@
     }
 
     function confirmarAtivacao() {
+        const senha = document.getElementById('input-senha-ativacao').value;
+        if (senha !== 'mutley2026') {
+            document.getElementById('err-senha-ativacao').textContent = 'Senha incorreta.';
+            return;
+        }
         fecharModalAtivacao();
         authFetch(`${BASE_URL}/api/medalhas/configuracao/ativar`, { method: 'POST' })
-            .then(() => atualizarToggle(true));
+            .then(async res => {
+                if (res.status === 403) {
+                    const msg = await res.text();
+                    alert(msg);
+                    return;
+                }
+                atualizarToggle(true);
+            });
     }
 
     function carregarStatusGeracao() {
@@ -526,6 +546,11 @@
     }
 </script>
 <div id="modal-confirmar-ativacao" class="modal-overlay hidden">
+    <div class="form-group" style="margin-top:16px;">
+        <label for="input-senha-ativacao">Senha do administrador</label>
+        <input type="password" id="input-senha-ativacao" placeholder="Digite a senha"/>
+        <span class="field-error" id="err-senha-ativacao"></span>
+    </div>
     <div class="modal-card">
         <h3>⚠️ Ativar Geração de Certificados</h3>
         <p>Tem certeza que deseja ativar a geração de certificados de medalha?</p>

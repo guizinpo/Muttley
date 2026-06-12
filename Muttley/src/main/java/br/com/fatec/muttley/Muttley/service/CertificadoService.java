@@ -189,13 +189,29 @@ public class CertificadoService {
                     .setTextAlignment(TextAlignment.CENTER)
                     .setMarginBottom(30));
 
-            // Linha de assinatura
-            Canvas signCanvas = new Canvas(new PdfCanvas(page), new Rectangle(W / 2 - 120, 115, 240, 2));
-            signCanvas.add(new Paragraph("_______________________________")
-                    .setFontColor(CINZA_TEXTO)
-                    .setFontSize(11)
-                    .setTextAlignment(TextAlignment.CENTER));
-            signCanvas.close();
+            // Assinatura
+            String assinaturaUrl = inscricao.getEvento().getAssinaturaUrl();
+            if (assinaturaUrl != null && !assinaturaUrl.isBlank()) {
+                try {
+                    java.io.File imgFile = new java.io.File(System.getProperty("user.dir") + assinaturaUrl);
+                    if (imgFile.exists()) {
+                        Image imgAssinatura = new Image(ImageDataFactory.create(imgFile.getAbsolutePath()));
+                        imgAssinatura.setWidth(150)
+                                .setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.CENTER)
+                                .setMarginBottom(4);
+                        document.add(imgAssinatura);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Erro ao carregar assinatura: " + e.getMessage());
+                }
+            } else {
+                document.add(new Paragraph("___________________________")
+                        .setFont(fonteNormal)
+                        .setFontSize(11)
+                        .setFontColor(CINZA_TEXTO)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setMarginBottom(4));
+            }
 
             document.add(new Paragraph("Coordenador do curso de Análise e Desenvolvimento de\nSistemas da FATEC Zona Leste")
                     .setFont(fonteNormal)

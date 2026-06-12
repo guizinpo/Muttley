@@ -97,6 +97,17 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group form-group-full">
+                        <label for="assinatura-arquivo">Assinatura do Coordenador</label>
+                        <input type="file" id="assinatura-arquivo" accept="image/png,image/jpeg" onchange="previewAssinatura(this)"/>
+                        <div id="preview-assinatura" style="margin-top:8px;display:none;">
+                            <img id="img-preview-assinatura" src="" style="height:60px;object-fit:contain;border:1px solid var(--gray-200);border-radius:4px;padding:4px;"/>
+                        </div>
+                        <input type="hidden" id="assinatura-url"/>
+                    </div>
+                </div>
+
                 <div id="qrcode-section" class="qrcode-box hidden">
                     <p style="font-weight:600;margin-bottom:14px;color:var(--gray-700);">QR Codes gerados
                         automaticamente:</p>
@@ -144,121 +155,150 @@
     let eventoAtual = null;
 
     function carregarPalestrantes() {
-    authFetch(`${BASE_URL}/api/palestrantes?size=100`)
-        .then(res => res.json())
-        .then(data => {
-        const select = document.getElementById('palestrante');
-        select.innerHTML = '<option value="">Selecione um palestrante...</option>';
-        data.content.forEach(p => {
-            const option = document.createElement('option');
-            option.value = p.id;
-            option.textContent = p.nome;
-            select.appendChild(option);
-        });
-        if (editId) carregarEvento();
-        });
+        authFetch(`${BASE_URL}/api/palestrantes?size=100`)
+            .then(res => res.json())
+            .then(data => {
+                const select = document.getElementById('palestrante');
+                select.innerHTML = '<option value="">Selecione um palestrante...</option>';
+                data.content.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.id;
+                    option.textContent = p.nome;
+                    select.appendChild(option);
+                });
+                if (editId) carregarEvento();
+            });
     }
 
     function carregarEvento() {
-      authFetch(`${BASE_URL}/api/eventos/${editId}`)
-        .then(res => res.json())
-        .then(ev => {
-          eventoAtual = ev;
-          document.getElementById('page-title').textContent = 'Editar Evento';
-          document.getElementById('breadcrumb-end').textContent = 'Editar';
-          document.querySelector('.nav-item.active').classList.remove('active');
-          document.querySelector('a[href="eventos.html"]').classList.add('active');
+        authFetch(`${BASE_URL}/api/eventos/${editId}`)
+            .then(res => res.json())
+            .then(ev => {
+                eventoAtual = ev;
+                document.getElementById('page-title').textContent = 'Editar Evento';
+                document.getElementById('breadcrumb-end').textContent = 'Editar';
+                document.querySelector('.nav-item.active').classList.remove('active');
+                document.querySelector('a[href="eventos.html"]').classList.add('active');
 
-          document.getElementById('modalidade').value = ev.modalidade;
-          document.getElementById('tipo').value = ev.tipo;
-          document.getElementById('area').value = ev.area;
-          document.getElementById('descricao').value = ev.descricao;
-          document.getElementById('palestrante').value = ev.palestrante.id;
-          document.getElementById('pontos').value = ev.pontos;
-          document.getElementById('data-evento').value = ev.dataEvento;
-          document.getElementById('hora-inicio').value = ev.horaInicio.substring(0, 5);
-          document.getElementById('hora-fim').value = ev.horaFim.substring(0, 5);
+                document.getElementById('modalidade').value = ev.modalidade;
+                document.getElementById('tipo').value = ev.tipo;
+                document.getElementById('area').value = ev.area;
+                document.getElementById('descricao').value = ev.descricao;
+                document.getElementById('palestrante').value = ev.palestrante.id;
+                document.getElementById('pontos').value = ev.pontos;
+                document.getElementById('data-evento').value = ev.dataEvento;
+                document.getElementById('hora-inicio').value = ev.horaInicio.substring(0, 5);
+                document.getElementById('hora-fim').value = ev.horaFim.substring(0, 5);
 
-          document.getElementById('token-inscricao').textContent = ev.qrCodeInscricao;
-          document.getElementById('token-participacao').textContent = ev.qrCodeParticipacao;
-          document.getElementById('img-qr-inscricao').src =
-            `${BASE_URL}/api/eventos/${editId}/qrcode/inscricao?baseUrl=${encodeURIComponent(window.location.origin)}`;
-          document.getElementById('img-qr-participacao').src =
-            `${BASE_URL}/api/eventos/${editId}/qrcode/participacao?baseUrl=${encodeURIComponent(window.location.origin)}`;
-          document.getElementById('qrcode-section').classList.remove('hidden');
-        });
+                document.getElementById('token-inscricao').textContent = ev.qrCodeInscricao;
+                document.getElementById('token-participacao').textContent = ev.qrCodeParticipacao;
+                document.getElementById('img-qr-inscricao').src =
+                    `${BASE_URL}/api/eventos/${editId}/qrcode/inscricao?baseUrl=${encodeURIComponent(window.location.origin)}`;
+                document.getElementById('img-qr-participacao').src =
+                    `${BASE_URL}/api/eventos/${editId}/qrcode/participacao?baseUrl=${encodeURIComponent(window.location.origin)}`;
+                document.getElementById('qrcode-section').classList.remove('hidden');
+
+                if (ev.assinaturaUrl) {
+                    document.getElementById('assinatura-url').value = ev.assinaturaUrl;
+                    document.getElementById('img-preview-assinatura').src = BASE_URL + ev.assinaturaUrl;
+                    document.getElementById('preview-assinatura').style.display = 'block';
+                }
+            });
     }
 
-    function salvar(e) {
-      e.preventDefault();
-      let valido = true;
+    async function salvar(e) {
+        e.preventDefault();
+        let valido = true;
 
-      const inicio = document.getElementById('hora-inicio').value;
-      const fim = document.getElementById('hora-fim').value;
+        const inicio = document.getElementById('hora-inicio').value;
+        const fim = document.getElementById('hora-fim').value;
 
-      const campos = [
-        { id: 'tipo', errId: 'err-tipo', msg: 'Selecione o tipo.', check: v => v !== '' },
-        { id: 'area', errId: 'err-area', msg: 'Informe a área.', check: v => v.trim().length > 0 },
-        { id: 'descricao', errId: 'err-descricao', msg: 'Descrição deve ter no mínimo 10 caracteres.', check: v => v.trim().length >= 10 },
-        { id: 'palestrante', errId: 'err-palestrante', msg: 'Selecione o palestrante.', check: v => v !== '' },
-        { id: 'pontos', errId: 'err-pontos', msg: 'Informe os pontos (≥ 0).', check: v => v !== '' && parseFloat(v) >= 0 },
-        { id: 'data-evento', errId: 'err-data-evento', msg: 'Informe a data do evento.', check: v => v !== '' },
-        { id: 'hora-inicio', errId: 'err-hora-inicio', msg: 'Informe o horário de início.', check: v => v !== '' },
-        { id: 'hora-fim', errId: 'err-hora-fim', msg: inicio && fim && fim <= inicio ? 'O horário de fim deve ser após o início.' : 'Informe o horário de fim.', check: v => v !== '' && (!inicio || v > inicio) },
-      ];
+        const campos = [
+            { id: 'tipo', errId: 'err-tipo', msg: 'Selecione o tipo.', check: v => v !== '' },
+            { id: 'area', errId: 'err-area', msg: 'Informe a área.', check: v => v.trim().length > 0 },
+            { id: 'descricao', errId: 'err-descricao', msg: 'Descrição deve ter no mínimo 10 caracteres.', check: v => v.trim().length >= 10 },
+            { id: 'palestrante', errId: 'err-palestrante', msg: 'Selecione o palestrante.', check: v => v !== '' },
+            { id: 'pontos', errId: 'err-pontos', msg: 'Informe os pontos (≥ 0).', check: v => v !== '' && parseFloat(v) >= 0 },
+            { id: 'data-evento', errId: 'err-data-evento', msg: 'Informe a data do evento.', check: v => v !== '' },
+            { id: 'hora-inicio', errId: 'err-hora-inicio', msg: 'Informe o horário de início.', check: v => v !== '' },
+            { id: 'hora-fim', errId: 'err-hora-fim', msg: inicio && fim && fim <= inicio ? 'O horário de fim deve ser após o início.' : 'Informe o horário de fim.', check: v => v !== '' && (!inicio || v > inicio) },
+        ];
 
-      campos.forEach(c => {
-        const val = document.getElementById(c.id).value;
-        const errEl = document.getElementById(c.errId);
-        if (!c.check(val)) {
-          errEl.textContent = c.msg;
-          document.getElementById(c.id).classList.add('input-error');
-          valido = false;
-        } else {
-          errEl.textContent = '';
-          document.getElementById(c.id).classList.remove('input-error');
-        }
-      });
+        campos.forEach(c => {
+            const val = document.getElementById(c.id).value;
+            const errEl = document.getElementById(c.errId);
+            if (!c.check(val)) {
+                errEl.textContent = c.msg;
+                document.getElementById(c.id).classList.add('input-error');
+                valido = false;
+            } else {
+                errEl.textContent = '';
+                document.getElementById(c.id).classList.remove('input-error');
+            }
+        });
 
-      if (!valido) return;
+        if (!valido) return;
 
-      const body = {
-        tipo: document.getElementById('tipo').value,
-        modalidade: document.getElementById('modalidade').value,
-        area: document.getElementById('area').value,
-        descricao: document.getElementById('descricao').value,
-        palestrante: { id: parseInt(document.getElementById('palestrante').value) },
-        pontos: parseFloat(document.getElementById('pontos').value),
-        dataEvento: document.getElementById('data-evento').value,
-        horaInicio: document.getElementById('hora-inicio').value,
-        horaFim: document.getElementById('hora-fim').value
-      };
+        const body = {
+            tipo: document.getElementById('tipo').value,
+            modalidade: document.getElementById('modalidade').value,
+            area: document.getElementById('area').value,
+            descricao: document.getElementById('descricao').value,
+            palestrante: { id: parseInt(document.getElementById('palestrante').value) },
+            pontos: parseFloat(document.getElementById('pontos').value),
+            dataEvento: document.getElementById('data-evento').value,
+            horaInicio: document.getElementById('hora-inicio').value,
+            horaFim: document.getElementById('hora-fim').value
+        };
 
-      const url = editId ? `${BASE_URL}/api/eventos/${editId}` : `${BASE_URL}/api/eventos`;
-      const method = editId ? 'PUT' : 'POST';
+        const url = editId ? `${BASE_URL}/api/eventos/${editId}` : `${BASE_URL}/api/eventos`;
+        const method = editId ? 'PUT' : 'POST';
 
-      authFetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      })
+        authFetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
         .then(res => res.json())
-        .then(ev => {
-          document.getElementById('toast-sucesso').classList.remove('hidden');
-          setTimeout(() => { document.getElementById('toast-sucesso').classList.add('hidden'); }, 2000);
+        .then(async ev => {
+            // upload da assinatura após salvar (funciona em criação e edição)
+            const fileAssinatura = document.getElementById('assinatura-arquivo');
+            if (fileAssinatura.files && fileAssinatura.files[0]) {
+                const formData = new FormData();
+                formData.append('arquivo', fileAssinatura.files[0]);
+                const token = sessionStorage.getItem('token');
+                await fetch(`${BASE_URL}/api/eventos/${ev.id}/upload-assinatura`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: formData
+                });
+            }
+            document.getElementById('toast-sucesso').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('toast-sucesso').classList.add('hidden'); }, 2000);
         })
         .catch(() => alert('Erro ao salvar evento.'));
     }
 
     function copiarLink(tipo) {
-      const token = tipo === 'inscricao'
-        ? document.getElementById('token-inscricao').textContent
-        : document.getElementById('token-participacao').textContent;
-      const url = `${window.location.origin}/inscricao.html?token=${token}`;
-      navigator.clipboard.writeText(url);
-      const t = document.getElementById('toast-copiado');
-      t.classList.remove('hidden');
-      setTimeout(() => t.classList.add('hidden'), 2000);
+        const token = tipo === 'inscricao'
+            ? document.getElementById('token-inscricao').textContent
+            : document.getElementById('token-participacao').textContent;
+        const url = `${window.location.origin}/inscricao.html?token=${token}`;
+        navigator.clipboard.writeText(url);
+        const t = document.getElementById('toast-copiado');
+        t.classList.remove('hidden');
+        setTimeout(() => t.classList.add('hidden'), 2000);
+    }
+
+    function previewAssinatura(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('img-preview-assinatura').src = e.target.result;
+                document.getElementById('preview-assinatura').style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
     carregarPalestrantes();

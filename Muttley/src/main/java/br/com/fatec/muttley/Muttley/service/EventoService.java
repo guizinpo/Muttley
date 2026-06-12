@@ -111,4 +111,8 @@ public class EventoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Horário de fim deve ser após o horário de início");
         }
     }
+
+    public Evento salvarDireto(Evento evento) {
+        return repository.save(evento);
+    }
 }
