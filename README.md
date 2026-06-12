@@ -1,11 +1,37 @@
-# 🎓 Muttley — Back-end
+# 🎓 Muttley — Sistema de Gestão de Eventos Acadêmicos
 
-Sistema de gerenciamento de eventos acadêmicos da Fatec.  
-Back-end desenvolvido em **Java 21 + Spring Boot 3.5 + Hibernate + MySQL**.
+Sistema desenvolvido para a **FATEC Zona Leste** com o objetivo de gerenciar eventos acadêmicos, inscrições, presenças e emissão de certificados para participantes e palestrantes.
 
 ---
 
-## ⚙️ Configuração inicial (faça isso uma vez)
+## 👥 Integrantes
+
+- Daiane da Silva
+- Diogo Felix
+- Fabio Gonçalves
+- Gabriel Rodrigues Vieira Brandão
+- Guilherme Rodrigues
+- Gustavo Lacerda
+- Otavio Gabriel Ribeiro Scabio
+
+---
+
+## 🛠️ Tecnologias
+
+- **Java 21**
+- **Spring Boot 3.5**
+- **Spring Data JPA + Hibernate**
+- **Spring Security + JWT**
+- **Spring Mail**
+- **MySQL**
+- **iText 7** (geração de PDFs)
+- **ZXing** (geração de QR Codes)
+- **Lombok**
+- **Maven**
+
+---
+
+## ⚙️ Configuração inicial
 
 ### 1. Clone o repositório
 
@@ -16,18 +42,18 @@ cd Muttley
 
 ### 2. Crie o arquivo `application.properties`
 
-O arquivo de configuração **não está no repositório** (por segurança), então cada um precisa criar o seu.
+O arquivo de configuração **não está no repositório** por segurança. Crie-o em:
 
-Crie o arquivo em:
 ```
 src/main/resources/application.properties
 ```
 
-Cole o conteúdo abaixo e ajuste com **seu usuário e senha do MySQL**:
+Cole o conteúdo abaixo e ajuste com seus dados:
 
 ```properties
 spring.application.name=Muttley
 
+# Banco de dados
 spring.datasource.url=jdbc:mysql://localhost:3306/db_muttley?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=America/Sao_Paulo
 spring.datasource.username=SEU_USUARIO
 spring.datasource.password=SUA_SENHA
@@ -39,69 +65,36 @@ spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 
 server.port=8080
+
+# E-mail
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=SEU_EMAIL@gmail.com
+spring.mail.password=SUA_APP_PASSWORD
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# JWT
+jwt.secret=SUA_CHAVE_SECRETA
+jwt.expiration=86400000
+
+# Admin
+admin.username=admin
+admin.password=SUA_SENHA_ADMIN
+
+# Medalhas
+medalhas.geracao.meses-permitidos=6,12
+
+# Upload
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
 ```
 
-> O banco `db_muttley` será criado automaticamente na primeira vez que rodar o projeto.
+> O banco `db_muttley` será criado automaticamente na primeira execução.
 
-### 3. Abra no IntelliJ
+### 3. Rode o projeto
 
-Abra a pasta do projeto no IntelliJ. Quando aparecer o popup **"Maven build script found"**, clique em **Load** para baixar as dependências.
-
-### 4. Rode o projeto
-
-Execute a classe `MuttleyApplication.java`. Se aparecer `Started MuttleyApplication` no console, tá funcionando.
-
----
-
-## 🌿 Como trabalhar no projeto sem dar conflito
-
-Nunca trabalhem direto na branch `main`. O fluxo é sempre:
-
-### Antes de começar a trabalhar
-
-Garanta que você está com a versão mais recente:
-
-```bash
-git checkout main
-git pull origin main
-```
-
-### Crie sua branch para a tarefa
-
-Cada funcionalidade/tela tem sua própria branch. Exemplos:
-
-```bash
-git checkout -b feature/entidade-participante
-git checkout -b feature/controller-evento
-git checkout -b feature/service-inscricao
-```
-
-### Enquanto trabalha
-
-Salve seu progresso com commits pequenos e descritivos:
-
-```bash
-git add .
-git commit -m "feat: adiciona entidade Participante com validações"
-```
-
-### Quando terminar
-
-Suba sua branch pro GitHub:
-
-```bash
-git push origin feature/nome-da-sua-branch
-```
-
-Depois abra um **Pull Request** no GitHub para a branch `main`. Avise o grupo no grupo antes de fazer merge.
-
-### Padrão de nomes de branch
-
-| Tipo | Exemplo |
-|---|---|
-| Nova funcionalidade | `feature/entidade-evento` |
-| Correção de bug | `fix/validacao-cpf` |
-| Configuração | `config/cors` |
+Execute a classe `MuttleyApplication.java`. Se aparecer `Started MuttleyApplication` no console, está funcionando.
 
 ---
 
@@ -110,44 +103,49 @@ Depois abra um **Pull Request** no GitHub para a branch `main`. Avise o grupo no
 ```
 src/main/java/br/com/fatec/muttley/
 │
-├── entity/          → Entidades do banco (Participante, Evento, Inscricao...)
-├── repository/      → Interfaces JPA (consultas ao banco)
-├── service/         → Regras de negócio
+├── config/          → Configurações gerais
 ├── controller/      → Endpoints REST
 ├── dto/             → Objetos de transferência de dados
-└── enums/           → Enumerações (TipoParticipante, TipoEvento...)
+├── entity/          → Entidades do banco
+├── enums/           → Enumerações
+├── exception/       → Tratamento global de exceções
+├── repository/      → Interfaces JPA
+├── security/        → Filtro JWT e configuração de segurança
+└── service/         → Regras de negócio
 ```
 
 ---
 
-## 🔗 Endpoints principais (resumo)
+## 🔗 Principais endpoints
 
 | Método | Endpoint | Descrição |
-|---|---|---|
-| GET | `/api/dashboard` | Próximos eventos |
+|--------|----------|-----------|
+| POST | `/api/auth/login` | Login do administrador |
 | GET | `/api/participantes` | Lista participantes |
-| GET | `/api/participantes/{id}` | Detalhes do participante |
-| PUT | `/api/participantes/{id}` | Editar participante |
 | GET | `/api/eventos` | Lista eventos |
-| GET | `/api/eventos/{id}` | Detalhes do evento |
 | POST | `/api/eventos` | Cadastrar evento |
 | PUT | `/api/eventos/{id}` | Editar evento |
-| DELETE | `/api/eventos/{id}` | Excluir evento |
+| POST | `/api/eventos/{id}/upload-assinatura` | Upload de assinatura do coordenador |
+| GET | `/api/palestrantes` | Lista palestrantes |
+| POST | `/api/palestrantes` | Cadastrar palestrante |
+| POST | `/api/palestrantes/{id}/upload-foto` | Upload de foto do palestrante |
+| POST | `/api/palestrantes/{id}/enviar-certificado` | Enviar certificado ao palestrante |
 | POST | `/api/public/inscricao/{token}` | Inscrição via QR Code (público) |
 | POST | `/api/public/participacao/{token}` | Confirmar presença via QR Code (público) |
-| GET | `/api/medalhas/regras` | Regras de medalha |
-| PUT | `/api/medalhas/regras` | Salvar regras |
+| GET | `/api/medalhas` | Lista medalhas |
 | GET | `/api/medalhas/calcular` | Calcular medalhas do semestre |
+| POST | `/api/medalhas/enviar-certificados` | Enviar certificados de medalha |
+| POST | `/api/medalhas/configuracao/ativar` | Ativar geração de certificados de medalha |
+| POST | `/api/medalhas/configuracao/desativar` | Desativar geração de certificados de medalha |
 
 ---
 
-## 🛠️ Tecnologias
+## ✨ Funcionalidades
 
-- Java 21
-- Spring Boot 3.5.14
-- Spring Data JPA + Hibernate
-- Spring Web
-- Spring Validation
-- MySQL
-- Lombok
-- Maven
+- Cadastro e gestão de eventos, palestrantes e participantes
+- Inscrição em eventos via QR Code
+- Confirmação de presença via QR Code com envio automático de certificado por e-mail
+- Geração de certificados em PDF com assinatura do coordenador
+- Sistema de medalhas por pontuação semestral
+- Exportação de relatórios em CSV
+- Autenticação com JWT
