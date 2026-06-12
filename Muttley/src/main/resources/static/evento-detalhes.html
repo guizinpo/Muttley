@@ -248,6 +248,8 @@
           a.click();
           window.URL.revokeObjectURL(url);
         });
+        authFetch(`${BASE_URL}/api/inscricoes/${inscricaoId}/enviar-certificado`, { method: 'POST' });
+
     }
 
     function abrirInscricao() {

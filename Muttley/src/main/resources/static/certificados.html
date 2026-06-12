@@ -184,16 +184,29 @@
     }
 
     function enviarTodos() {
+        const btn = document.querySelector('button[onclick="enviarTodos()"]');
+        btn.disabled = true;
+        btn.textContent = '⏳ Enviando...';
+
         fetch(`${BASE_URL}/api/public/certificados/enviar?cpf=${encodeURIComponent(cpfAtual)}`, {
             method: 'POST'
         })
         .then(res => {
             if (!res.ok) throw new Error();
+            btn.textContent = '✅ Enviado!';
             const t = document.getElementById('toast-enviado');
             t.classList.remove('hidden');
-            setTimeout(() => t.classList.add('hidden'), 4000);
+            setTimeout(() => {
+                t.classList.add('hidden');
+                btn.disabled = false;
+                btn.textContent = '📧 Enviar todos por e-mail';
+            }, 4000);
         })
-        .catch(() => alert('Erro ao enviar certificados.'));
+        .catch(() => {
+            alert('Erro ao enviar certificados.');
+            btn.disabled = false;
+            btn.textContent = '📧 Enviar todos por e-mail';
+        });
     }
 
     function voltar() {

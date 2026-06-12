@@ -15,6 +15,7 @@ import br.com.fatec.muttley.Muttley.dto.ParticipanteDetalheDTO;
 import br.com.fatec.muttley.Muttley.service.InscricaoService;
 import br.com.fatec.muttley.Muttley.service.MedalhaService;
 import java.time.LocalDate;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/participantes")

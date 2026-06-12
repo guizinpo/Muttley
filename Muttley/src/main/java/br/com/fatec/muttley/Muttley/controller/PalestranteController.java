@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/palestrantes")
 @RequiredArgsConstructor
@@ -55,5 +57,21 @@ public class PalestranteController {
     public ResponseEntity<Void> enviarCertificado(@PathVariable Long id) {
         emailService.enviarCertificadoPalestrante(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/upload-foto")
+    public ResponseEntity<Map<String, String>> uploadFoto(
+            @RequestParam("arquivo") org.springframework.web.multipart.MultipartFile arquivo) {
+        try {
+            String nomeArquivo = System.currentTimeMillis() + "_" + arquivo.getOriginalFilename();
+            String pastaUploads = System.getProperty("user.dir") + "/uploads/palestrantes/";
+            java.nio.file.Path destino = java.nio.file.Paths.get(pastaUploads + nomeArquivo);
+            java.nio.file.Files.createDirectories(destino.getParent());
+            arquivo.transferTo(destino.toFile());
+            String url = "/uploads/palestrantes/" + nomeArquivo;
+            return ResponseEntity.ok(Map.of("url", url));
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao fazer upload da foto", e);
+        }
     }
 }

@@ -26,7 +26,6 @@ public class EmailService {
     private final InscricaoRepository inscricaoRepository;
     private final PalestranteRepository palestranteRepository;
 
-    @Async
     public void enviarCertificado(Long inscricaoId) {
         Inscricao inscricao = inscricaoRepository.findById(inscricaoId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -77,7 +76,6 @@ public class EmailService {
         }
     }
 
-    @Async
     public void enviarCertificadoPalestrante(Long palestranteId) {
         Palestrante palestrante = palestranteRepository.findById(palestranteId)
                 .orElseThrow(() -> new ResponseStatusException(

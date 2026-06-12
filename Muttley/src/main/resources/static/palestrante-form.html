@@ -151,16 +151,24 @@
       if (!valido) return;
 
       const fileInput = document.getElementById('foto-arquivo');
-      if (fileInput.files && fileInput.files[0]) {
-        const formData = new FormData();
-        formData.append('arquivo', fileInput.files[0]);
-        const token = sessionStorage.getItem('token');
-        const res = await fetch(`${BASE_URL}/api/medalhas/upload`, {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token },
-          body: formData
-        });
-        document.getElementById('foto').value = await res.text();
+        if (fileInput.files && fileInput.files[0]) {
+          const formData = new FormData();
+          formData.append('arquivo', fileInput.files[0]);
+          const token = sessionStorage.getItem('token');
+          console.log('token:', token);
+          console.log('url:', `${BASE_URL}/api/palestrantes/upload-foto`);
+          const res = await fetch(`${BASE_URL}/api/palestrantes/upload-foto`, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token },
+            body: formData
+          });
+          console.log('status upload:', res.status);
+          if (!res.ok) {
+            console.log('erro upload:', await res.text());
+            return; // para aqui se upload falhou
+          }
+          const data = await res.json();
+          document.getElementById('foto').value = data.url;
       }
 
       const body = {

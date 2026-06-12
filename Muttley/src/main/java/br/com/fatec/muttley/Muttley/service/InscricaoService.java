@@ -58,8 +58,7 @@ public class InscricaoService {
         return repository.save(inscricao);
     }
 
-    public Inscricao confirmarPresenca(String token, String cpf){
-
+    public Inscricao confirmarPresenca(String token, String cpf) {
         Evento evento = eventoService.buscarPorQrCodeParticipacao(token);
 
         Participante participante = participanteService.buscarPorCpf(cpf)
@@ -76,12 +75,15 @@ public class InscricaoService {
         }
 
         inscricao.setStatus(StatusInscricao.CONCLUIDO);
+        repository.save(inscricao); // ← salva PRIMEIRO
+
         try {
-            emailService.enviarCertificado(inscricao.getId());
+            emailService.enviarCertificado(inscricao.getId()); // ← dispara DEPOIS
         } catch (Exception e) {
             System.err.println("Erro ao enviar certificado: " + e.getMessage());
         }
-        return repository.save(inscricao);
+
+        return inscricao;
     }
 
     public Page<Inscricao> listarPorParticipante(Long participanteId, Pageable pageable) {
